@@ -1,0 +1,27 @@
+package codegen.aws.models.formation.iam;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class IAMRole {
+    @JsonProperty("Type")
+    private String type = "AWS::IAM::Role";
+
+    @JsonProperty("Properties")
+    private IAMProperty property;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public IAMProperty getProperty() {
+        return property;
+    }
+
+    public void setProperty(IAMProperty property) {
+        this.property = property;
+    }
+}
