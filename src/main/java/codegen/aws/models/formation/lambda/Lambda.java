@@ -1,10 +1,12 @@
 package codegen.aws.models.formation.lambda;
 
 import codegen.aws.models.formation.CloudFormationComponent;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Lambda implements CloudFormationComponent {
+    @JsonProperty("Type")
     private String type = "AWS::Lambda::Function";
-    private String Properties = "temp";
+    private LambdaProperty Properties;
 
     public String getType() {
         return type;
@@ -14,11 +16,11 @@ public class Lambda implements CloudFormationComponent {
         this.type = type;
     }
 
-    public String getProperties() {
+    public LambdaProperty getProperties() {
         return Properties;
     }
 
-    public void setProperties(String properties) {
+    public void setProperties(LambdaProperty properties) {
         Properties = properties;
     }
 }

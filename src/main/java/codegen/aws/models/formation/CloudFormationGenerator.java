@@ -6,7 +6,6 @@ import codegen.aws.models.formation.iam.IAMAssumeRolePolicyDocument;
 import codegen.aws.models.formation.iam.IAMProperty;
 import codegen.aws.models.formation.iam.IAMRole;
 import codegen.aws.models.formation.iam.IAMStatement;
-import codegen.aws.models.formation.iam.IAMStatementPrincipal;
 import codegen.aws.models.formation.lambda.Lambda;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,10 +46,8 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
     }
 
     public IAMRole generateLambdaIAM () {
-        IAMStatementPrincipal iamStatementPrincipal= new IAMStatementPrincipal();
 
         IAMStatement iamStatement = new IAMStatement();
-        iamStatement.setPrincipal(iamStatementPrincipal);
         ArrayList<IAMStatement> iamStatements = new ArrayList<>();
         iamStatements.add(iamStatement);
 
