@@ -24,43 +24,7 @@ public class CloudFormation {
     private String description = "An example template with an IAM role for a Lambda state machine.";
 
     @JsonProperty("Resources")
-    private Map<String ,Object> objectMap = new LinkedHashMap<>();
-
-    public static void main (String [] args) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        IAMStatementPrincipal iamStatementPrincipal= new IAMStatementPrincipal();
-
-        IAMStatement iamStatement = new IAMStatement();
-        iamStatement.setPrincipal(iamStatementPrincipal);
-        ArrayList<IAMStatement> iamStatements = new ArrayList<>();
-        iamStatements.add(iamStatement);
-
-        IAMAssumeRolePolicyDocument iamAssumeRolePolicyDocument = new IAMAssumeRolePolicyDocument();
-        iamAssumeRolePolicyDocument.setStatement(iamStatements);
-
-        IAMProperty iamProperty = new IAMProperty();
-        iamProperty.setAssumeRolePolicyDocument(iamAssumeRolePolicyDocument);
-
-        IAMRole iamRole = new IAMRole();
-        iamRole.setProperty(iamProperty);
-
-        Lambda lambda = new Lambda();
-
-        Map<String ,Object> objectMap = new LinkedHashMap<>();
-        objectMap.put("LambdaExecutionRole",iamRole);
-        objectMap.put("MyLambdaFunction",lambda);
-
-
-        CloudFormation cloudFormation = new CloudFormation();
-        cloudFormation.setObjectMap(objectMap);
-
-
-        String cloudFormationJson = mapper.writeValueAsString(cloudFormation);
-        System.out.println(cloudFormationJson);
-
-    }
+    private Map<String ,CloudFormationComponent> objectMap = new LinkedHashMap<>();
 
     public String getVersion() {
         return version;
@@ -78,11 +42,11 @@ public class CloudFormation {
         this.description = description;
     }
 
-    public Map<String, Object> getObjectMap() {
+    public Map<String, CloudFormationComponent> getObjectMap() {
         return objectMap;
     }
 
-    public void setObjectMap(Map<String, Object> objectMap) {
+    public void setObjectMap(Map<String, CloudFormationComponent> objectMap) {
         this.objectMap = objectMap;
     }
 }

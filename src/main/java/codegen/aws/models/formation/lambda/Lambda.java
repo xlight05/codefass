@@ -1,6 +1,8 @@
 package codegen.aws.models.formation.lambda;
 
-public class Lambda {
+import codegen.aws.models.formation.CloudFormationComponent;
+
+public class Lambda implements CloudFormationComponent {
     private String type = "AWS::Lambda::Function";
     private String Properties = "temp";
 

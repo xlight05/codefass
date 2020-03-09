@@ -1,0 +1,40 @@
+{
+  "apiVersion": "flows.knative.dev/v1alpha1",
+  "kind": "Parallel",
+  "metadata": {
+    "name": "parallel"
+  },
+  "spec": {
+    "channelTemplate": {
+      "apiVersion": "messaging.knative.dev/v1alpha1",
+      "kind": "InMemoryChannel"
+    },
+    "branches": [
+      {
+        "subscriber": {
+          "ref": {
+            "apiVersion": "serving.knative.dev/v1",
+            "kind": "Service",
+            "name": "first"
+          }
+        }
+      },
+      {
+        "subscriber": {
+          "ref": {
+            "apiVersion": "serving.knative.dev/v1",
+            "kind": "Service",
+            "name": "second"
+          }
+        }
+      }
+    ],
+    "reply": {
+      "ref": {
+        "apiVersion": "serving.knative.dev/v1",
+        "kind": "Service",
+        "name": "event-display"
+      }
+    }
+  }
+}

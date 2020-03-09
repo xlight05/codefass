@@ -1,8 +1,9 @@
 package codegen.aws.models.formation.iam;
 
+import codegen.aws.models.formation.CloudFormationComponent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class IAMRole {
+public class IAMRole implements CloudFormationComponent {
     @JsonProperty("Type")
     private String type = "AWS::IAM::Role";
 
