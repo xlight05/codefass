@@ -1,0 +1,149 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "An example template with an IAM role for a Lambda state machine.",
+  "Resources": {
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
+      }
+    },
+    "FunctionOne": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n"
+        },
+        "Runtime": "nodejs12.x",
+        "Timeout": "25"
+      }
+    },
+    "FunctionTwo": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Two!\");\n};\n"
+        },
+        "Runtime": "nodejs12.x",
+        "Timeout": "25"
+      }
+    },
+    "FunctionThree": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Three!\");\n};\n"
+        },
+        "Runtime": "nodejs12.x",
+        "Timeout": "25"
+      }
+    },
+    "StatesExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  {
+                    "Fn::Sub": "states.${AWS::Region}.amazonaws.com"
+                  }
+                ]
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "StatesExecutionPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "MyStateMachine": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Sub": [
+            "  {\n    \"Comment\": \"A simple AWS Step Functions that executes three Lamdas sequincially\",\n    \"StartAt\": \"Case1\",\n    \"States\": {\n      \"Case1\": {\n        \"Type\": \"Task\",\n        \"Resource\": \"${lambdaArn1}\",\n        \"Next\": \"Case2\"\n      }, \n      \"Case2\": {\n        \"Type\": \"Task\",\n        \"Resource\": \"${lambdaArn2}\",\n        \"Next\": \"Case3\"\n      },\n      \"Case3\": {\n        \"Type\": \"Task\",\n        \"Resource\": \"${lambdaArn3}\",\n        \"End\": true\n      }\n    }\n  }",
+            {
+              "lambdaArn1": {
+                "Fn::GetAtt": [
+                  "FunctionOne",
+                  "Arn"
+                ]
+              },
+              "lambdaArn2": {
+                "Fn::GetAtt": [
+                  "FunctionTwo",
+                  "Arn"
+                ]
+              },
+              "lambdaArn3": {
+                "Fn::GetAtt": [
+                  "FunctionThree",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "StatesExecutionRole",
+            "Arn"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -12,10 +12,10 @@ public class LambdaProperty {
     @JsonProperty("Runtime")
     private String runtime;
     @JsonProperty("Timeout")
-    private LambdaCode timeout;
+    private String timeout;
 
     public LambdaProperty(String handler, LambdaRole role, LambdaCode code, String runtime,
-                          LambdaCode timeout) {
+                          String timeout) {
         this.handler = handler;
         this.role = role;
         this.code = code;
@@ -55,11 +55,11 @@ public class LambdaProperty {
         this.runtime = runtime;
     }
 
-    public LambdaCode getTimeout() {
+    public String getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(LambdaCode timeout) {
+    public void setTimeout(String timeout) {
         this.timeout = timeout;
     }
 }

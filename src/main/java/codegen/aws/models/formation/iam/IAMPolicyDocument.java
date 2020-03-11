@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 
-public class IAMAssumeRolePolicyDocument {
+public class IAMPolicyDocument {
     @JsonProperty("Version")
     private String version = "2012-10-17";
     @JsonProperty("Statement")

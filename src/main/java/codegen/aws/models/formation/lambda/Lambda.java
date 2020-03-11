@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Lambda implements CloudFormationComponent {
     @JsonProperty("Type")
     private String type = "AWS::Lambda::Function";
-    private LambdaProperty Properties;
+    @JsonProperty("Properties")
+    private LambdaProperty properties;
 
     public String getType() {
         return type;
@@ -17,10 +18,10 @@ public class Lambda implements CloudFormationComponent {
     }
 
     public LambdaProperty getProperties() {
-        return Properties;
+        return properties;
     }
 
     public void setProperties(LambdaProperty properties) {
-        Properties = properties;
+        this.properties = properties;
     }
 }
