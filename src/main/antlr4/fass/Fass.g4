@@ -20,7 +20,6 @@ function_stat
 
 function_block
 : OBRACE function_repeat CBRACE
-| function_stat
 ;
 
 function_handler
@@ -44,6 +43,7 @@ stat
  | if_stat
  | while_stat
  | log
+ | function_def
  | OTHER {System.err.println("unknown char: " + $OTHER.text);}
  ;
 
@@ -111,6 +111,7 @@ POW : '^';
 NOT : '!';
 
 SCOL : ';';
+SEMI : ':';
 ASSIGN : '=';
 OPAR : '(';
 CPAR : ')';

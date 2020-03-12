@@ -1,3 +1,4 @@
+import codegen.Function;
 import fass.FassBaseVisitor;
 import fass.FassParser;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -225,19 +226,34 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
     }
 
     @Override
+    public Value visitFunction_stat(FassParser.Function_statContext ctx) {
+//        FassParser.Function_nameContext name= ctx.function_name();
+////        try {
+//            System.out.println("In name");
+////        } catch (NullPointerException e){
+////
+////        }
+        return super.visitFunction_stat(ctx);
+    }
+
+    @Override
     public Value visitFunction_def(FassParser.Function_defContext ctx) {
+        String id = ctx.ID().getText();
+        List<FassParser.Function_statContext> functionContents =
+                ctx.function_block().function_repeat().function_stat();
 
 
+        String name = "";
+        String handler = "";
+        for (FassParser.Function_statContext function:functionContents){
+            if (function.function_name() != null){
+                name = function.function_name().STRING().getText();
+            } else if (function.function_handler() != null){
+                handler = function.function_handler().STRING().getText();
+            }
+        }
+        Function func = new Function(name,handler,"Java","index.java");
+        System.out.println(func);
         return super.visitFunction_def(ctx);
-    }
-
-    @Override
-    public Value visitFunction_handler(FassParser.Function_handlerContext ctx) {
-        return super.visitFunction_handler(ctx);
-    }
-
-    @Override
-    public Value visitFunction_name(FassParser.Function_nameContext ctx) {
-        return super.visitFunction_name(ctx);
     }
 }

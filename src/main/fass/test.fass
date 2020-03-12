@@ -1,5 +1,11 @@
 n = 9;
 
+function ff = {
+    name:"hii"
+    handler:"ewww"
+};
+
+
 while n > 0 {
 
   # expressions can be surrounded by parenthesis, of course
