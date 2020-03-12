@@ -4,6 +4,37 @@ parse
  : block EOF
  ;
 
+function_def
+: FUNCTION ID ASSIGN function_block SCOL
+;
+
+function_repeat
+: function_stat*
+;
+
+function_stat
+: function_handler
+| function_name
+| OTHER {System.err.println("unknown char: " + $OTHER.text);}
+;
+
+function_block
+: OBRACE function_repeat CBRACE
+| function_stat
+;
+
+function_handler
+: HANDLER SEMI STRING
+;
+
+function_name
+: NAME SEMI STRING
+;
+
+FUNCTION : 'function';
+HANDLER : 'handler';
+NAME : 'name';
+
 block
  : stat*
  ;
