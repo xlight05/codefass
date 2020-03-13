@@ -4,6 +4,42 @@ parse
  : block EOF
  ;
 
+sequence_def
+: SEQUENCE ID ASSIGN sequence_block SCOL
+;
+
+sequence_block
+: SOBRACE sequence_repeat SCBRACE
+;
+
+sequence_repeat
+: sequence_stat*
+;
+
+sequence_stat
+: ID
+;
+
+SEQUENCE : 'sequence';
+
+parallel_def
+: PARALLEL ID ASSIGN parallel_block SCOL
+;
+
+parallel_block
+: SOBRACE parallel_repeat SCBRACE
+;
+
+parallel_repeat
+: parallel_stat*
+;
+
+parallel_stat
+: ID
+;
+
+PARALLEL : 'parallel';
+
 function_def
 : FUNCTION ID ASSIGN function_block SCOL
 ;
@@ -15,6 +51,7 @@ function_repeat
 function_stat
 : function_handler
 | function_name
+| function_language
 | OTHER {System.err.println("unknown char: " + $OTHER.text);}
 ;
 
@@ -30,9 +67,14 @@ function_name
 : NAME SEMI STRING
 ;
 
+function_language
+: LANGUAGE SEMI STRING
+;
+
 FUNCTION : 'function';
 HANDLER : 'handler';
 NAME : 'name';
+LANGUAGE : 'language';
 
 block
  : stat*
@@ -44,6 +86,7 @@ stat
  | while_stat
  | log
  | function_def
+ | sequence_def
  | OTHER {System.err.println("unknown char: " + $OTHER.text);}
  ;
 
@@ -117,6 +160,8 @@ OPAR : '(';
 CPAR : ')';
 OBRACE : '{';
 CBRACE : '}';
+SOBRACE : '[';
+SCBRACE : ']';
 
 TRUE : 'true';
 FALSE : 'false';

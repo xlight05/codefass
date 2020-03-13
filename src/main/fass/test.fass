@@ -1,10 +1,21 @@
 n = 9;
 
-function ff = {
-    name:"hii"
+function f1 = {
+    name:"function oneeee"
     handler:"ewww"
 };
 
+function f2 = {
+    name:"function twoo"
+    handler:"ewww"
+};
+
+function f3 = {
+    name:"function threee"
+    handler:"ewwwww"
+};
+
+sequence s1 = [f1 f2];
 
 while n > 0 {
 

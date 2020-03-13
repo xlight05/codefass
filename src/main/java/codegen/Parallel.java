@@ -1,15 +1,16 @@
 package codegen;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Parallel implements FunctionStep {
-    private ArrayList<Function> functionList;
+    private List<Function> functionList;
 
-    public ArrayList<Function> getFunctionList() {
+    public List<Function> getFunctionList() {
         return functionList;
     }
 
-    public void setFunctionList(ArrayList<Function> functionList) {
+    public void setFunctionList(List<Function> functionList) {
         this.functionList = functionList;
     }
 

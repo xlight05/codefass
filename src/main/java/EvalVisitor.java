@@ -1,8 +1,11 @@
 import codegen.Function;
+import codegen.Parallel;
+import codegen.Sequence;
 import fass.FassBaseVisitor;
 import fass.FassParser;
 import org.antlr.v4.runtime.misc.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -226,17 +229,6 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
     }
 
     @Override
-    public Value visitFunction_stat(FassParser.Function_statContext ctx) {
-//        FassParser.Function_nameContext name= ctx.function_name();
-////        try {
-//            System.out.println("In name");
-////        } catch (NullPointerException e){
-////
-////        }
-        return super.visitFunction_stat(ctx);
-    }
-
-    @Override
     public Value visitFunction_def(FassParser.Function_defContext ctx) {
         String id = ctx.ID().getText();
         List<FassParser.Function_statContext> functionContents =
@@ -253,7 +245,51 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
             }
         }
         Function func = new Function(name,handler,"Java","index.java");
-        System.out.println(func);
+        memory.put(id,new Value(func));
         return super.visitFunction_def(ctx);
+    }
+
+    @Override
+    public Value visitSequence_def(FassParser.Sequence_defContext ctx) {
+        String id = ctx.ID().getText();
+        List<FassParser.Sequence_statContext> sequenceElements =
+                ctx.sequence_block().sequence_repeat().sequence_stat();
+        Sequence sequence = new Sequence();
+        List<Function> functionList = new ArrayList <>();
+        for (FassParser.Sequence_statContext functionElement:sequenceElements){
+            String elementKey = functionElement.ID().getText();
+            if (memory.containsKey(elementKey)){
+                Function function = (Function) memory.get(elementKey).value;
+                functionList.add(function);
+            } else {
+                throw new RuntimeException("no such variable: " + elementKey);
+            }
+        }
+        sequence.setFunctionList(functionList);
+        memory.put(id,new Value(sequence));
+        System.out.println(sequence);
+        return super.visitSequence_def(ctx);
+    }
+
+    @Override
+    public Value visitParallel_def(FassParser.Parallel_defContext ctx) {
+        String id = ctx.ID().getText();
+        List<FassParser.Parallel_statContext> parallelElements =
+                ctx.parallel_block().parallel_repeat().parallel_stat();
+        Parallel parallel = new Parallel();
+        List<Function> functionList = new ArrayList <>();
+        for (FassParser.Parallel_statContext functionElement:parallelElements){
+            String elementKey = functionElement.ID().getText();
+            if (memory.containsKey(elementKey)){
+                Function function = (Function) memory.get(elementKey).value;
+                functionList.add(function);
+            } else {
+                throw new RuntimeException("no such variable: " + elementKey);
+            }
+        }
+        parallel.setFunctionList(functionList);
+        memory.put(id,new Value(parallel));
+        System.out.println(parallel);
+        return super.visitParallel_def(ctx);
     }
 }
