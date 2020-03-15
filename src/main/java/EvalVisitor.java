@@ -1,3 +1,4 @@
+import codegen.Condition;
 import codegen.Function;
 import codegen.Parallel;
 import codegen.Sequence;
@@ -63,49 +64,47 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
     // expr overrides
     @Override
     public Value visitParExpr(FassParser.ParExprContext ctx) {
-        return this.visit(ctx.expr());
-    }
 
-    @Override
-    public Value visitPowExpr(FassParser.PowExprContext ctx) {
-        Value left = this.visit(ctx.expr(0));
-        Value right = this.visit(ctx.expr(1));
-        return new Value(Math.pow(left.asDouble(), right.asDouble()));
-    }
-
-    @Override
-    public Value visitUnaryMinusExpr(FassParser.UnaryMinusExprContext ctx) {
         Value value = this.visit(ctx.expr());
-        return new Value(-value.asDouble());
+        //System.out.println(value);
+        return value;
     }
 
     @Override
     public Value visitNotExpr(FassParser.NotExprContext ctx) {
         Value value = this.visit(ctx.expr());
-        return new Value(!value.asBoolean());
+        //System.out.println("In Not");
+        String evaluator="!";
+        Condition condition = new Condition(value.value,null,evaluator);
+        return new Value(condition);
     }
 
     @Override
     public Value visitMultiplicationExpr(@NotNull FassParser.MultiplicationExprContext ctx) {
-
+        //System.out.println("In multi");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-
+        String evaluator="";
         switch (ctx.op.getType()) {
             case FassParser.MULT:
-                return new Value(left.asDouble() * right.asDouble());
+                evaluator= "*";
+                break;
             case FassParser.DIV:
-                return new Value(left.asDouble() / right.asDouble());
+                evaluator="/";
+                break;
             case FassParser.MOD:
-                return new Value(left.asDouble() % right.asDouble());
+                evaluator="%";
+                break;
             default:
-                throw new RuntimeException("unknown operator: " + FassParser.tokenNames[ctx.op.getType()]);
+                //throw new RuntimeException("unknown operator: " + FassParser.tokenNames[ctx.op.getType()]);
         }
+        Condition condition = new Condition(left.value,right.value,evaluator);
+        return new Value(condition);
     }
 
     @Override
     public Value visitAdditiveExpr(@NotNull FassParser.AdditiveExprContext ctx) {
-
+        //System.out.println("in Additive");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
 
@@ -123,56 +122,61 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     @Override
     public Value visitRelationalExpr(@NotNull FassParser.RelationalExprContext ctx) {
-
+        //System.out.println("In Relational");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-
+        String evaluator ="";
         switch (ctx.op.getType()) {
             case FassParser.LT:
-                return new Value(left.asDouble() < right.asDouble());
+                evaluator = "<";
+                break;
             case FassParser.LTEQ:
-                return new Value(left.asDouble() <= right.asDouble());
+                evaluator = "<=";
+                break;
             case FassParser.GT:
-                return new Value(left.asDouble() > right.asDouble());
+                evaluator = ">";
+                break;
             case FassParser.GTEQ:
-                return new Value(left.asDouble() >= right.asDouble());
-            default:
-                throw new RuntimeException("unknown operator: " + FassParser.tokenNames[ctx.op.getType()]);
+                evaluator = ">=";
         }
+        Condition condition = new Condition(left,right,evaluator);
+        return new Value(condition);
     }
 
     @Override
     public Value visitEqualityExpr(@NotNull FassParser.EqualityExprContext ctx) {
-
+        //System.out.println("In Equality");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-
+        String evaluator ="";
         switch (ctx.op.getType()) {
             case FassParser.EQ:
-                return left.isDouble() && right.isDouble() ?
-                        new Value(Math.abs(left.asDouble() - right.asDouble()) < SMALL_VALUE) :
-                        new Value(left.equals(right));
+                evaluator="==";
+                break;
             case FassParser.NEQ:
-                return left.isDouble() && right.isDouble() ?
-                        new Value(Math.abs(left.asDouble() - right.asDouble()) >= SMALL_VALUE) :
-                        new Value(!left.equals(right));
-            default:
-                throw new RuntimeException("unknown operator: " + FassParser.tokenNames[ctx.op.getType()]);
+                evaluator="!=";
+                break;
         }
+        Condition condition = new Condition(left.value,right.value,evaluator);
+        return new Value((condition));
     }
 
     @Override
     public Value visitAndExpr(FassParser.AndExprContext ctx) {
+        //System.out.println("In AND");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-        return new Value(left.asBoolean() && right.asBoolean());
+        Condition condition = new Condition(left.value,right.value,"&&");
+        return new Value(condition);
     }
 
     @Override
     public Value visitOrExpr(FassParser.OrExprContext ctx) {
+        //System.out.println("In OR");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-        return new Value(left.asBoolean() || right.asBoolean());
+        Condition condition = new Condition(left.value,right.value,"||");
+        return new Value(condition);
     }
 
     // log override
@@ -184,30 +188,43 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
     }
 
     // if override
+//    @Override
+//    public Value visitIf_stat(FassParser.If_statContext ctx) {
+//        List<FassParser.Condition_blockContext> conditions =  ctx.condition_block();
+//
+//        boolean evaluatedBlock = false;
+//
+//        for(FassParser.Condition_blockContext condition : conditions) {
+//
+//            Value evaluated = this.visit(condition.expr());
+//
+//            if(evaluated.asBoolean()) {
+//                evaluatedBlock = true;
+//                // evaluate this block whose expr==true
+//                this.visit(condition.stat_block());
+//                break;
+//            }
+//        }
+//
+//        if(!evaluatedBlock && ctx.stat_block() != null) {
+//            // evaluate the else-stat_block (if present == not null)
+//            this.visit(ctx.stat_block());
+//        }
+//
+//        return Value.VOID;
+//    }
+
     @Override
     public Value visitIf_stat(FassParser.If_statContext ctx) {
-        List<FassParser.Condition_blockContext> conditions =  ctx.condition_block();
-
-        boolean evaluatedBlock = false;
-
-        for(FassParser.Condition_blockContext condition : conditions) {
-
-            Value evaluated = this.visit(condition.expr());
-
-            if(evaluated.asBoolean()) {
-                evaluatedBlock = true;
-                // evaluate this block whose expr==true
-                this.visit(condition.stat_block());
-                break;
-            }
+        List<FassParser.Condition_blockContext> condition_block = ctx.condition_block();
+//        FassParser.Condition_blockContext firstIfCondition = condition_block.get(0);
+//        System.out.println(this.visit(firstIfCondition.expr()));
+        for (FassParser.Condition_blockContext ifCondition : condition_block){
+            Condition condition = (Condition)this.visit(ifCondition.expr()).value;
+            System.out.println(condition);
+            //ifCondition.stat_block().
         }
-
-        if(!evaluatedBlock && ctx.stat_block() != null) {
-            // evaluate the else-stat_block (if present == not null)
-            this.visit(ctx.stat_block());
-        }
-
-        return Value.VOID;
+        return super.visitIf_stat(ctx);
     }
 
     // while override

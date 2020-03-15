@@ -1,29 +1,29 @@
 package codegen;
 
 public class Condition {
-    private String leftSide;
-    private String rightSide;
+    private Object leftSide;
+    private Object rightSide;
     private String evaluator;
 
-    public Condition(String leftSide, String rightSide, String evaluator) {
+    public Condition(Object leftSide, Object rightSide, String evaluator) {
         this.leftSide = leftSide;
         this.rightSide = rightSide;
         this.evaluator = evaluator;
     }
 
-    public String getLeftSide() {
+    public Object getLeftSide() {
         return leftSide;
     }
 
-    public void setLeftSide(String leftSide) {
+    public void setLeftSide(Object leftSide) {
         this.leftSide = leftSide;
     }
 
-    public String getRightSide() {
+    public Object getRightSide() {
         return rightSide;
     }
 
-    public void setRightSide(String rightSide) {
+    public void setRightSide(Object rightSide) {
         this.rightSide = rightSide;
     }
 
@@ -38,8 +38,8 @@ public class Condition {
     @Override
     public String toString() {
         return "Condition{" +
-                "leftSide='" + leftSide + '\'' +
-                ", rightSide='" + rightSide + '\'' +
+                "leftSide=" + leftSide +
+                ", rightSide=" + rightSide +
                 ", evaluator='" + evaluator + '\'' +
                 '}';
     }

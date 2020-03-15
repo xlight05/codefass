@@ -104,7 +104,6 @@ condition_block
 
 stat_block
  : OBRACE block CBRACE
- | stat
  ;
 
 while_stat
@@ -116,11 +115,9 @@ log
  ;
 
 expr
- : expr POW<assoc=right> expr           #powExpr
- | MINUS expr                           #unaryMinusExpr
- | NOT expr                             #notExpr
+ :NOT expr                              #notExpr
  | expr op=(MULT | DIV | MOD) expr      #multiplicationExpr
- | expr op=(PLUS | MINUS) expr          #additiveExpr
+ | expr op=(PLUS | MINUS) expr          #additiveExpr //needed?
  | expr op=(LTEQ | GTEQ | LT | GT) expr #relationalExpr
  | expr op=(EQ | NEQ) expr              #equalityExpr
  | expr AND expr                        #andExpr
