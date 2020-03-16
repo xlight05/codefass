@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Parallel implements FunctionStep {
+    private String name;
     private List<Function> functionList;
 
     public List<Function> getFunctionList() {
@@ -12,6 +13,14 @@ public class Parallel implements FunctionStep {
 
     public void setFunctionList(List<Function> functionList) {
         this.functionList = functionList;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

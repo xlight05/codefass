@@ -20,6 +20,7 @@ public class FassBuildAws implements Runnable {
         System.out.println("Building AWS shit");
 
         FunctionOrchestrator testWorkflow = testChoiceFlow();
+        //FunctionOrchestrator testWorkflow = testComplexChoiceFlow();
         //System.out.println(testWorkflow);
         CloudArtifactGenerator awsGen = new CloudFormationGenerator(testWorkflow);
         awsGen.build();
@@ -84,6 +85,73 @@ public class FassBuildAws implements Runnable {
         Condition condition = new Condition("25","55",">=");
 
         Choice choice = new Choice(condition);
+        choice.setName("ChoiceStep1");
+        Parallel parallel = new Parallel();
+
+        Function f1 = new Function("Success Parrarel Function 1","index.handler","nodejs12.x","exports.handler = (event, " +
+                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+        Function f2 = new Function("Success Parrarel Function 2","index.handler","nodejs12.x","exports.handler = (event, " +
+                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+        Function f3 = new Function("Success Parrarel  Function 3","index.handler","nodejs12.x","exports.handler = (event, " +
+                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+
+        ArrayList<Function> successFunctionList = new ArrayList<>();
+        successFunctionList.add(f1);
+        successFunctionList.add(f2);
+        successFunctionList.add(f3);
+
+        parallel.setFunctionList(successFunctionList);
+
+        ArrayList<FunctionStep> successFlow = new ArrayList<>();
+        successFlow.add(parallel);
+        choice.setSuccessBranch(successFlow);
+
+        Sequence sequence = new Sequence();
+
+        Function fs1 = new Function("Success Seq Function 1","index.handler","nodejs12.x","exports.handler = (event, " +
+                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+        Function fs2 = new Function("Success Seq Function 2","index.handler","nodejs12.x","exports.handler = (event, " +
+                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+        Function fs3 = new Function("Success Seq  Function 3","index.handler","nodejs12.x","exports.handler = (event, " +
+                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+
+        ArrayList<Function> failureFunctionList = new ArrayList<>();
+        failureFunctionList.add(fs1);
+        failureFunctionList.add(fs2);
+        failureFunctionList.add(fs3);
+
+        sequence.setFunctionList(failureFunctionList);
+
+        ArrayList<FunctionStep> failureFlow = new ArrayList<>();
+        failureFlow.add(sequence);
+        choice.setFailureBranch(failureFlow);
+
+        Condition condition1 = new Condition("25","55","==");
+
+        Choice choice1 = new Choice(condition1);
+        choice1.setName("ChoiceStep1");
+
+        stepList.add(choice);
+        stepList.add(choice1);
+        testWorkflow.setStepList(stepList);
+        return  testWorkflow;
+    }
+
+    public static FunctionOrchestrator testComplexChoiceFlow () {
+        FunctionOrchestrator testWorkflow = new FunctionOrchestrator("Test Choice Workflow", "Test " +
+                "workflow to test the Choice flow", "1.0.0");
+        ArrayList<FunctionStep> stepList = new ArrayList<>();
+        //Choice{condition=Condition{leftSide=Condition{leftSide=Condition{leftSide=9.0, rightSide=2.0,
+        // evaluator='%'}, rightSide=0.0, evaluator='=='}, rightSide=null, evaluator='!'},
+        // successBranch=[], FailureBranch=[]}
+
+        Condition smallCondition = new Condition(9.0,2.0,"%");
+
+        Condition condition = new Condition(smallCondition,0.0,"==");
+
+        Condition rootCondition = new Condition(condition,null,"!");
+
+        Choice choice = new Choice(rootCondition);
 
         Parallel parallel = new Parallel();
 

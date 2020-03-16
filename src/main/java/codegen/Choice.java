@@ -3,6 +3,7 @@ package codegen;
 import java.util.ArrayList;
 
 public class Choice implements FunctionStep {
+    private String name;
     private Condition condition;
     private ArrayList<FunctionStep>  successBranch;
     private ArrayList<FunctionStep>  FailureBranch;
@@ -35,6 +36,14 @@ public class Choice implements FunctionStep {
 
     public void setFailureBranch(ArrayList<FunctionStep> failureBranch) {
         FailureBranch = failureBranch;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

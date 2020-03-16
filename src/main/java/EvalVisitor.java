@@ -1,3 +1,4 @@
+import codegen.Choice;
 import codegen.Condition;
 import codegen.Function;
 import codegen.Parallel;
@@ -217,12 +218,16 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
     @Override
     public Value visitIf_stat(FassParser.If_statContext ctx) {
         List<FassParser.Condition_blockContext> condition_block = ctx.condition_block();
+        List<Choice> choices = new ArrayList<>();
 //        FassParser.Condition_blockContext firstIfCondition = condition_block.get(0);
 //        System.out.println(this.visit(firstIfCondition.expr()));
         for (FassParser.Condition_blockContext ifCondition : condition_block){
             Condition condition = (Condition)this.visit(ifCondition.expr()).value;
-            System.out.println(condition);
-            //ifCondition.stat_block().
+
+            List<FassParser.StatContext> stats = ifCondition.stat_block().block().stat();
+            Choice choice = new Choice(condition);
+            System.out.println(choice);
+            choices.add(choice);
         }
         return super.visitIf_stat(ctx);
     }
