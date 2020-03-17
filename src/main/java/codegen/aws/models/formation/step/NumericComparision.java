@@ -6,61 +6,61 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class NumericComparision extends SimpleComparision {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("NumericEquals")
-    private Integer numericEquals = null;
+    private Double numericEquals = null;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("NumericGreaterThan")
-    private Integer numericGreaterThan = null;
+    private Double numericGreaterThan = null;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("NumericGreaterThanEquals")
-    private Integer numericGreaterThanEquals = null;
+    private Double numericGreaterThanEquals = null;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("NumericLessThan")
-    private Integer numericLessThan = null;
+    private Double numericLessThan = null;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("NumericLessThanEquals")
-    private Integer numericLessThanEquals = null;
+    private Double numericLessThanEquals = null;
 
-    public Integer getNumericEquals() {
+    public Double getNumericEquals() {
         return numericEquals;
     }
 
-    public void setNumericEquals(Integer numericEquals) {
+    public void setNumericEquals(Double numericEquals) {
         this.numericEquals = numericEquals;
     }
 
-    public Integer getNumericGreaterThan() {
+    public Double getNumericGreaterThan() {
         return numericGreaterThan;
     }
 
-    public void setNumericGreaterThan(Integer numericGreaterThan) {
+    public void setNumericGreaterThan(Double numericGreaterThan) {
         this.numericGreaterThan = numericGreaterThan;
     }
 
-    public Integer getNumericGreaterThanEquals() {
+    public Double getNumericGreaterThanEquals() {
         return numericGreaterThanEquals;
     }
 
-    public void setNumericGreaterThanEquals(Integer numericGreaterThanEquals) {
+    public void setNumericGreaterThanEquals(Double numericGreaterThanEquals) {
         this.numericGreaterThanEquals = numericGreaterThanEquals;
     }
 
-    public Integer getNumericLessThan() {
+    public Double getNumericLessThan() {
         return numericLessThan;
     }
 
-    public void setNumericLessThan(Integer numericLessThan) {
+    public void setNumericLessThan(Double numericLessThan) {
         this.numericLessThan = numericLessThan;
     }
 
-    public Integer getNumericLessThanEquals() {
+    public Double getNumericLessThanEquals() {
         return numericLessThanEquals;
     }
 
-    public void setNumericLessThanEquals(Integer numericLessThanEquals) {
+    public void setNumericLessThanEquals(Double numericLessThanEquals) {
         this.numericLessThanEquals = numericLessThanEquals;
     }
 }

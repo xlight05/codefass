@@ -193,6 +193,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             } else {
                 variable = (String)right;
             }
+            comparision.setVariable(variable);
             return comparision;
         } else {
             //fill
@@ -225,8 +226,8 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                 }
                 return stringComparision;
             }
-        } else if (left instanceof Integer){
-            Integer leftInt = (Integer) left;
+        } else if (left instanceof Double){
+            Double leftInt = (Double) left;
             NumericComparision numericComparision = new NumericComparision();
             switch (condition.getEvaluator()) {
                 case ">=":
@@ -255,6 +256,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             }
             return booleanComparision;
         } else {
+            System.out.println();
             throw new IllegalArgumentException("Object is invalid");
         }
     }

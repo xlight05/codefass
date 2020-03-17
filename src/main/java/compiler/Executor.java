@@ -30,16 +30,16 @@ public class Executor {
 
     public FunctionOrchestrator compile() throws IOException {
 
-        String args = "src/main/fass/test.fass";
+        String args = "src/main/fass/simpleIf.fass";
         System.out.println("parsing: " + args);
 
         FassLexer lexer = null;
-            lexer = new FassLexer(new ANTLRFileStream(args));
-            FassParser parser = new FassParser(new CommonTokenStream(lexer));
-            ParseTree tree = parser.parse();
-            EvalVisitor visitor = new EvalVisitor();
-            visitor.visit(tree);
-            FunctionOrchestrator functionOrchestrator = EvalVisitor.functionOrchestrator;
-            return functionOrchestrator;
+        lexer = new FassLexer(new ANTLRFileStream(args));
+        FassParser parser = new FassParser(new CommonTokenStream(lexer));
+        ParseTree tree = parser.parse();
+        EvalVisitor visitor = new EvalVisitor();
+        visitor.visit(tree);
+        FunctionOrchestrator functionOrchestrator = EvalVisitor.functionOrchestrator;
+        return functionOrchestrator;
     }
 }
