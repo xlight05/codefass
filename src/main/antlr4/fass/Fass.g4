@@ -87,6 +87,7 @@ stat
  | log
  | function_def
  | sequence_def
+ | ID
  | OTHER {System.err.println("unknown char: " + $OTHER.text);}
  ;
 

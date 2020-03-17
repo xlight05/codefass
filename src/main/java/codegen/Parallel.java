@@ -3,9 +3,12 @@ package codegen;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Parallel implements FunctionStep {
-    private String name;
+public class Parallel extends FunctionStep {
     private List<Function> functionList;
+
+    public Parallel(String name) {
+        super(name);
+    }
 
     public List<Function> getFunctionList() {
         return functionList;
@@ -13,14 +16,6 @@ public class Parallel implements FunctionStep {
 
     public void setFunctionList(List<Function> functionList) {
         this.functionList = functionList;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override

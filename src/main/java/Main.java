@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.lang.Exception;
 
 import fass.FassLexer;
@@ -21,5 +22,19 @@ public class Main {
         ParseTree tree = parser.parse();
         EvalVisitor visitor = new EvalVisitor();
         visitor.visit(tree);
+        Double d = EvalVisitor.SMALL_VALUE;
+    }
+
+    public void compile() throws IOException {
+
+        String args = "src/main/fass/test.fass";
+        System.out.println("parsing: " + args);
+
+        FassLexer lexer = new FassLexer(new ANTLRFileStream(args));
+        FassParser parser = new FassParser(new CommonTokenStream(lexer));
+        ParseTree tree = parser.parse();
+        EvalVisitor visitor = new EvalVisitor();
+        visitor.visit(tree);
+        Double d = EvalVisitor.SMALL_VALUE;
     }
 }

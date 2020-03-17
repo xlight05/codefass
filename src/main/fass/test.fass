@@ -16,17 +16,14 @@ function f3 = {
 };
 
 sequence s1 = [f1 f2];
+sequence s2 = [f1 f3];
+sequence s3 = [f2 f3];
 
 if (!(n % 2 == 0)) {
-log n + " -> even";
+    s1
+} else if (n/5 ==0) {
+    s2
 }
 else {
-log n + " -> odd";
-}
-
-if (n % 2 == 0) {
-  log n + " -> even";
-}
-else {
-  log n + " -> odd";
+    s3
 }

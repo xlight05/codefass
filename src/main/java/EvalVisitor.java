@@ -1,6 +1,7 @@
-import codegen.Choice;
+import codegen.IfBranch;
 import codegen.Condition;
 import codegen.Function;
+import codegen.IfExpr;
 import codegen.Parallel;
 import codegen.Sequence;
 import fass.FassBaseVisitor;
@@ -218,17 +219,35 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
     @Override
     public Value visitIf_stat(FassParser.If_statContext ctx) {
         List<FassParser.Condition_blockContext> condition_block = ctx.condition_block();
-        List<Choice> choices = new ArrayList<>();
+        IfExpr ifExpr = new IfExpr("ChoiceBlock"); //TODO check
+        List<IfBranch> ifBranches = new ArrayList<>();
 //        FassParser.Condition_blockContext firstIfCondition = condition_block.get(0);
 //        System.out.println(this.visit(firstIfCondition.expr()));
-        for (FassParser.Condition_blockContext ifCondition : condition_block){
+        for (FassParser.Condition_blockContext ifCondition : condition_block){ //If and else if
             Condition condition = (Condition)this.visit(ifCondition.expr()).value;
 
-            List<FassParser.StatContext> stats = ifCondition.stat_block().block().stat();
-            Choice choice = new Choice(condition);
-            System.out.println(choice);
-            choices.add(choice);
+            List<FassParser.StatContext> stats = ifCondition.stat_block().block().stat();//Probably avoid multiple sequences
+            Sequence sequence = null;
+            for (FassParser.StatContext stat:stats){
+                if (stat.ID() != null){
+                    String sequenceId = stat.ID().getText();
+                    sequence = (Sequence) memory.get(sequenceId).value;//Add support for not just seq
+                } else {
+                    //Fill
+                    System.out.println("Not a ID");
+                }
+            }
+
+            IfBranch ifBranch = new IfBranch(condition);
+            ifBranch.setSuccessBranch(sequence);
+            ifBranches.add(ifBranch);
         }
+        ifExpr.setIfBranches(ifBranches);
+        //assuming has else
+        String sequenceId =ctx.stat_block().block().stat().get(0).ID().getText();
+        Sequence sequence = (Sequence) memory.get(sequenceId).value;
+        ifExpr.setElseBranchBody(sequence);
+        System.out.println(ifExpr);
         return super.visitIf_stat(ctx);
     }
 
@@ -276,7 +295,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         String id = ctx.ID().getText();
         List<FassParser.Sequence_statContext> sequenceElements =
                 ctx.sequence_block().sequence_repeat().sequence_stat();
-        Sequence sequence = new Sequence();
+        Sequence sequence = new Sequence(id);
         List<Function> functionList = new ArrayList <>();
         for (FassParser.Sequence_statContext functionElement:sequenceElements){
             String elementKey = functionElement.ID().getText();
@@ -298,7 +317,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         String id = ctx.ID().getText();
         List<FassParser.Parallel_statContext> parallelElements =
                 ctx.parallel_block().parallel_repeat().parallel_stat();
-        Parallel parallel = new Parallel();
+        Parallel parallel = new Parallel(id);
         List<Function> functionList = new ArrayList <>();
         for (FassParser.Parallel_statContext functionElement:parallelElements){
             String elementKey = functionElement.ID().getText();

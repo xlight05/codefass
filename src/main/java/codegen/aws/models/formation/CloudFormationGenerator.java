@@ -1,11 +1,12 @@
 package codegen.aws.models.formation;
 
-import codegen.Choice;
+import codegen.IfBranch;
 import codegen.CloudArtifactGenerator;
 import codegen.Condition;
 import codegen.Function;
 import codegen.FunctionOrchestrator;
 import codegen.FunctionStep;
+import codegen.IfExpr;
 import codegen.Parallel;
 import codegen.Sequence;
 import codegen.aws.models.formation.iam.IAMPolicyDocument;
@@ -20,7 +21,6 @@ import codegen.aws.models.formation.lambda.LambdaRole;
 import codegen.aws.models.formation.step.BooleanComparision;
 import codegen.aws.models.formation.step.ChoiceStep;
 import codegen.aws.models.formation.step.Comparision;
-import codegen.aws.models.formation.step.NestedComparision;
 import codegen.aws.models.formation.step.NumericComparision;
 import codegen.aws.models.formation.step.SimpleComparision;
 import codegen.aws.models.formation.step.Step;
@@ -28,7 +28,6 @@ import codegen.aws.models.formation.step.StringComparision;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -58,10 +57,13 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         } else if (step instanceof Parallel) {
             Parallel parallel = (Parallel)step;
             functions.addAll(parallel.getFunctionList());
-        } else if (step instanceof Choice) {
-            Choice choice = (Choice)step;
-            functions.addAll(getFunctionsFromStepList(choice.getSuccessBranch()));
-            functions.addAll(getFunctionsFromStepList(choice.getFailureBranch()));
+        } else if (step instanceof IfExpr) {
+            IfExpr ifExpr = (IfExpr)step;
+            List<IfBranch> ifBranches = ifExpr.getIfBranches();
+            for (IfBranch ifBranch : ifBranches){
+                functions.addAll(getFunctionsFromStep(ifBranch.getSuccessBranch()));
+            }
+            functions.addAll(getFunctionsFromStep(ifExpr.getElseBranchBody())); //test logic
         }
         return functions;
     }
@@ -149,25 +151,30 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
 
         Step step = new Step();
         step.setComment(functionOrchestrator.getDescription());
+        Map<String,Object> stepList = new LinkedHashMap<>();
 
         List <FunctionStep> functionStepList = functionOrchestrator.getStepList();
         List<Comparision> comparisionList = new ArrayList<>();
         //Because first one is Choice
         for (FunctionStep functionStep : functionStepList){
-            if (functionStep instanceof Choice){
-                Choice choice = (Choice)functionStep;
-                step.setStartsAt(choice.getName());//Fix
-                Condition rootCondition = choice.getCondition();
+            step.setStartsAt(functionStepList.get(0).getName());
+            if (functionStep instanceof IfExpr){
+                List<IfBranch> ifBranches = ((IfExpr)functionStep).getIfBranches();
+                for (IfBranch ifBranch:ifBranches){
+                    Condition rootCondition = ifBranch.getCondition();
 
-                SimpleComparision simpleComparision= (SimpleComparision) comparisionBuilder(rootCondition);
+                    SimpleComparision simpleComparision= (SimpleComparision) comparisionBuilder(rootCondition);
+                    simpleComparision.setNext(ifBranch.getSuccessBranch().getName());
+                    comparisionList.add(simpleComparision);
 
-                comparisionList.add(simpleComparision);
+                }
+                ChoiceStep choiceStep = new ChoiceStep();
+                choiceStep.setChoices(comparisionList);
+                choiceStep.setDef(((IfExpr)functionStep).getElseBranchBody().getName());
+                stepList.put(functionStep.getName(),choiceStep);
             }
         }
-        ChoiceStep choiceStep = new ChoiceStep();
-        choiceStep.setChoices(comparisionList);
-        Map<String,Object> stepList = new LinkedHashMap<>();
-        stepList.put("ChoiceStateX",choiceStep);
+
         step.setStates(stepList);
         return step;
     }
