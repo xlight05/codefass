@@ -10,8 +10,10 @@ import codegen.IfExpr;
 import codegen.Parallel;
 import codegen.Sequence;
 import codegen.aws.models.formation.CloudFormationGenerator;
+import compiler.Executor;
 import picocli.CommandLine;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +23,20 @@ public class FassBuildAws implements Runnable {
     public void run() {
         System.out.println("Building AWS shit");
 
-        FunctionOrchestrator testWorkflow = testChoiceFlow();
-        //FunctionOrchestrator testWorkflow = testComplexChoiceFlow();
-        //System.out.println(testWorkflow);
-        CloudArtifactGenerator awsGen = new CloudFormationGenerator(testWorkflow);
-        awsGen.build();
+        Executor compiler = new Executor();
+        try {
+            FunctionOrchestrator liveFlow = compiler.compile();
+            System.out.println(liveFlow);
+            CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
+            awsGen.build();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        FunctionOrchestrator testWorkflow = testChoiceFlow();
+//        //FunctionOrchestrator testWorkflow = testComplexChoiceFlow();
+//        //System.out.println(testWorkflow);
+//        CloudArtifactGenerator awsGen = new CloudFormationGenerator(testWorkflow);
+//        awsGen.build();
 
     }
 
@@ -134,7 +145,6 @@ public class FassBuildAws implements Runnable {
         ifBranches.add(ifBranch1);
 
         ifExpr.setIfBranches(ifBranches);
-
 
         stepList.add(ifExpr);
 

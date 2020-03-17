@@ -1,3 +1,6 @@
+package compiler;
+
+import codegen.FunctionOrchestrator;
 import codegen.IfBranch;
 import codegen.Condition;
 import codegen.Function;
@@ -20,6 +23,13 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     // store variables (there's only one global scope!)
     private Map<String, Value> memory = new HashMap<String, Value>();
+
+    public static FunctionOrchestrator functionOrchestrator;
+
+    public EvalVisitor() {
+        super();
+        functionOrchestrator = new FunctionOrchestrator("Test Name","Test Desc","1.0.0");
+    }
 
     // assignment/id overrides
     @Override
@@ -191,14 +201,14 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     // if override
 //    @Override
-//    public Value visitIf_stat(FassParser.If_statContext ctx) {
+//    public Compiler.Value visitIf_stat(FassParser.If_statContext ctx) {
 //        List<FassParser.Condition_blockContext> conditions =  ctx.condition_block();
 //
 //        boolean evaluatedBlock = false;
 //
 //        for(FassParser.Condition_blockContext condition : conditions) {
 //
-//            Value evaluated = this.visit(condition.expr());
+//            Compiler.Value evaluated = this.visit(condition.expr());
 //
 //            if(evaluated.asBoolean()) {
 //                evaluatedBlock = true;
@@ -213,7 +223,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 //            this.visit(ctx.stat_block());
 //        }
 //
-//        return Value.VOID;
+//        return Compiler.Value.VOID;
 //    }
 
     @Override
@@ -247,7 +257,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         String sequenceId =ctx.stat_block().block().stat().get(0).ID().getText();
         Sequence sequence = (Sequence) memory.get(sequenceId).value;
         ifExpr.setElseBranchBody(sequence);
-        System.out.println(ifExpr);
+        functionOrchestrator.getStepList().add(ifExpr);
         return super.visitIf_stat(ctx);
     }
 
@@ -308,7 +318,6 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         }
         sequence.setFunctionList(functionList);
         memory.put(id,new Value(sequence));
-        System.out.println(sequence);
         return super.visitSequence_def(ctx);
     }
 
@@ -330,7 +339,6 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         }
         parallel.setFunctionList(functionList);
         memory.put(id,new Value(parallel));
-        System.out.println(parallel);
         return super.visitParallel_def(ctx);
     }
 }
