@@ -21,6 +21,7 @@ import codegen.aws.models.formation.lambda.LambdaRole;
 import codegen.aws.models.formation.step.BooleanComparision;
 import codegen.aws.models.formation.step.ChoiceStep;
 import codegen.aws.models.formation.step.Comparision;
+import codegen.aws.models.formation.step.NestedComparision;
 import codegen.aws.models.formation.step.NumericComparision;
 import codegen.aws.models.formation.step.SimpleComparision;
 import codegen.aws.models.formation.step.Step;
@@ -162,11 +163,16 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                 List<IfBranch> ifBranches = ((IfExpr)functionStep).getIfBranches();
                 for (IfBranch ifBranch:ifBranches){
                     Condition rootCondition = ifBranch.getCondition();
-
-                    SimpleComparision simpleComparision= (SimpleComparision) comparisionBuilder(rootCondition);
-                    simpleComparision.setNext(ifBranch.getSuccessBranch().getName());
-                    comparisionList.add(simpleComparision);
-
+                    Comparision comparision = comparisionBuilder(rootCondition);
+                    if (comparision instanceof NestedComparision){
+                        NestedComparision nestedComparision = (NestedComparision) comparision;
+                        nestedComparision.setNext(ifBranch.getSuccessBranch().getName());
+                        comparisionList.add(nestedComparision);
+                    } else {
+                        SimpleComparision simpleComparision = (SimpleComparision)comparision;
+                        simpleComparision.setNext(ifBranch.getSuccessBranch().getName());
+                        comparisionList.add(simpleComparision);
+                    }
                 }
                 ChoiceStep choiceStep = new ChoiceStep();
                 choiceStep.setChoices(comparisionList);
@@ -194,10 +200,56 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                 variable = (String)right;
             }
             comparision.setVariable(variable);
+
+            if (condition.getEvaluator().equals("!=")){
+                NestedComparision nestedComparision = new NestedComparision();
+                nestedComparision.setNot(comparision);
+                return nestedComparision;
+            } else {
+                return comparision;
+            }
+
+        }else if (left instanceof Condition && right instanceof Condition){
+            SimpleComparision leftCompare = (SimpleComparision) comparisionBuilder((Condition)left);
+            SimpleComparision rightCompare = (SimpleComparision) comparisionBuilder((Condition)right);
+            List<SimpleComparision> simpleComparisionList = new ArrayList<>();
+            simpleComparisionList.add(leftCompare);
+            simpleComparisionList.add(rightCompare);
+            NestedComparision comparision = new NestedComparision();
+            switch (condition.getEvaluator()) {
+                case "!":
+                    System.out.println("Inside the Case");
+                    System.out.println(leftCompare);
+                    System.out.println(rightCompare);
+                    break;
+                case "&&":
+                    comparision.setAnd(simpleComparisionList);
+                    break;
+                case "||":
+                    comparision.setOr(simpleComparisionList);
+                    break;
+            }
             return comparision;
         } else {
-            //fill
-            return null;
+            if (condition.getEvaluator().equals("!")){
+                if (left instanceof Condition){
+                    Comparision comparision = comparisionBuilder((Condition)left);
+                    if (comparision instanceof SimpleComparision){
+                        NestedComparision nestedComparision = new NestedComparision();
+                        nestedComparision.setNot((SimpleComparision) comparision);
+                        return nestedComparision;
+                    } else {
+                        System.out.println("Not a simple Branch");
+                        return null;
+                    }
+                } else {
+                    System.out.println("Not a Condition");
+                    return null;
+                }
+            } else {
+                System.out.println("Invalid Code");
+                return null;
+            }
         }
     }
     public SimpleComparision assignEvaulator(Object left,Condition condition){
@@ -223,6 +275,9 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                     case "==":
                         stringComparision.setStringEquals(leftStr);
                         break;
+                    case "!=":
+                        stringComparision.setStringEquals(leftStr);
+                        break;
                 }
                 return stringComparision;
             }
@@ -245,6 +300,9 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                 case "==":
                     numericComparision.setNumericEquals(leftInt);
                     break;
+                case "!=":
+                    numericComparision.setNumericEquals(leftInt);
+                    break;
             }
             return numericComparision;
         } else if (left instanceof Boolean){
@@ -252,6 +310,8 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             Boolean leftBool = (Boolean) left;
             BooleanComparision booleanComparision = new BooleanComparision();
             if (condition.getEvaluator().equals("==")){
+                booleanComparision.setBooleanEquals(leftBool);
+            } else if (condition.getEvaluator().equals("!=")){
                 booleanComparision.setBooleanEquals(leftBool);
             }
             return booleanComparision;

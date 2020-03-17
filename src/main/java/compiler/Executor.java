@@ -30,7 +30,7 @@ public class Executor {
 
     public FunctionOrchestrator compile() throws IOException {
 
-        String args = "src/main/fass/simpleIf.fass";
+        String args = "src/main/fass/andIf.fass";
         System.out.println("parsing: " + args);
 
         FassLexer lexer = null;
