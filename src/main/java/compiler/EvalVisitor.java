@@ -288,14 +288,15 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
         String name = "";
         String handler = "";
+        //TODO check
         for (FassParser.Function_statContext function:functionContents){
             if (function.function_name() != null){
-                name = function.function_name().STRING().getText();
+                name = function.function_name().STRING().getText().replace("\"","");
             } else if (function.function_handler() != null){
-                handler = function.function_handler().STRING().getText();
+                handler = function.function_handler().STRING().getText().replace("\"","");
             }
         }
-        Function func = new Function(name,handler,"Java","index.java");
+        Function func = new Function(name,handler,"nodejs12.x","index.js");
         memory.put(id,new Value(func));
         return super.visitFunction_def(ctx);
     }

@@ -18,7 +18,7 @@ function f3 = {
 sequence s1 = [f1 f2];
 sequence s2 = [f1 f3];
 sequence s3 = [f2 f3];
-
+        
 if (!("$.var"=="ew")) {
     s1
 } else if ("$.var"!=25) {

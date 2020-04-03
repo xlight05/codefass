@@ -36,32 +36,34 @@ import java.util.List;
 import java.util.Map;
 
 public class CloudFormationGenerator extends CloudArtifactGenerator {
+
     private ArrayList<Function> functionList;
+
     public CloudFormationGenerator(FunctionOrchestrator functionOrchestrator) {
         super(functionOrchestrator);
         functionList = getFunctionsFromStepList(functionOrchestrator.getStepList());
     }
 
-    public ArrayList<Function> getFunctionsFromStepList (List<FunctionStep> stepList) {
+    public ArrayList<Function> getFunctionsFromStepList(List<FunctionStep> stepList) {
         ArrayList<Function> functions = new ArrayList<>();
-        for (FunctionStep step: stepList){
+        for (FunctionStep step : stepList) {
             functions.addAll(getFunctionsFromStep(step));
         }
         return functions;
     }
 
-    public ArrayList<Function> getFunctionsFromStep (FunctionStep step) {
+    public ArrayList<Function> getFunctionsFromStep(FunctionStep step) {
         ArrayList<Function> functions = new ArrayList<>();
         if (step instanceof Sequence) {
-            Sequence sequence = (Sequence)step;
+            Sequence sequence = (Sequence) step;
             functions.addAll(sequence.getFunctionList());
         } else if (step instanceof Parallel) {
-            Parallel parallel = (Parallel)step;
+            Parallel parallel = (Parallel) step;
             functions.addAll(parallel.getFunctionList());
         } else if (step instanceof IfExpr) {
-            IfExpr ifExpr = (IfExpr)step;
+            IfExpr ifExpr = (IfExpr) step;
             List<IfBranch> ifBranches = ifExpr.getIfBranches();
-            for (IfBranch ifBranch : ifBranches){
+            for (IfBranch ifBranch : ifBranches) {
                 functions.addAll(getFunctionsFromStep(ifBranch.getSuccessBranch()));
             }
             functions.addAll(getFunctionsFromStep(ifExpr.getElseBranchBody())); //test logic
@@ -69,115 +71,115 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         return functions;
     }
 
-//    public void build() {
-//        ObjectMapper mapper = new ObjectMapper();
-//        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-//
-//        IAMRole iamRole = generateLambdaIAM();
-//        IAMRole stateIAM = generateStateMachineIAM();
-//
-//        Map<String,Lambda> lambdas = generateLambdas();
-//
-//        Map<String ,CloudFormationComponent> objectMap = new LinkedHashMap<>();
-//        objectMap.put("LambdaExecutionRole",iamRole);
-//
-//        for (String name : lambdas.keySet()){
-//            objectMap.put(name,lambdas.get(name));
-//        }
-//        objectMap.put("StatesExecutionRole",stateIAM);
-//
-//
-//
-//
-//        CloudFormation cloudFormation = new CloudFormation();
-//        cloudFormation.setObjectMap(objectMap);
-//
-//        try {
-//            String cloudFormationJson = mapper.writeValueAsString(cloudFormation);
-//            System.out.println(cloudFormationJson);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     public void build() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-//        Step step = new Step();
-//
-//        ChoiceStep choiceStep = new ChoiceStep();
-//
-//        List<Comparision> choices = new ArrayList<>();
-//
-//        SimpleComparision simpleComparision = new SimpleComparision();
-//        simpleComparision.setVariable("$.value");
-//        simpleComparision.setNumericEquals(0);
-//        simpleComparision.setNext("ValueIsZero");
-//
-//        SimpleComparision simpleComparision1 = new SimpleComparision();
-//        simpleComparision1.setVariable("$.type");
-//        simpleComparision1.setStringEquals("Private");
-//        simpleComparision1.setNext("Public");
-//
-//        NestedComparision nestedComparision1 = new NestedComparision();
-//        SimpleComparision simpleComparision2 = new SimpleComparision();
-//        simpleComparision2.setVariable("$.type");
-//        simpleComparision2.setStringEquals("Private");
-//
-//        nestedComparision1.setNot(simpleComparision2);
-//        nestedComparision1.setNext("Public");
-//
-//        choices.add(simpleComparision);
-//        choices.add(simpleComparision1);
-//        choices.add(nestedComparision1);
-//
-//        choiceStep.setChoices(choices);
-//        Map<String,Object> stepList = new LinkedHashMap<>();
-//        stepList.put("ChoiceStateX",choiceStep);
-//        step.setStates(stepList);
+        IAMRole iamRole = generateLambdaIAM();
+        IAMRole stateIAM = generateStateMachineIAM();
 
-        Step step = generateStep();
+        Map<String,Lambda> lambdas = generateLambdas();
+
+        Map<String ,CloudFormationComponent> objectMap = new LinkedHashMap<>();
+        objectMap.put("LambdaExecutionRole",iamRole);
+
+        for (String name : lambdas.keySet()){
+            objectMap.put(name,lambdas.get(name));
+        }
+        objectMap.put("StatesExecutionRole",stateIAM);
+
+
+
+
+        CloudFormation cloudFormation = new CloudFormation();
+        cloudFormation.setObjectMap(objectMap);
 
         try {
-            String cloudFormationJson = mapper.writeValueAsString(step);
+            String cloudFormationJson = mapper.writeValueAsString(cloudFormation);
             System.out.println(cloudFormationJson);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
 
-    public Step generateStep () {
+//    public void build() {
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+//
+////        Step step = new Step();
+////
+////        ChoiceStep choiceStep = new ChoiceStep();
+////
+////        List<Comparision> choices = new ArrayList<>();
+////
+////        SimpleComparision simpleComparision = new SimpleComparision();
+////        simpleComparision.setVariable("$.value");
+////        simpleComparision.setNumericEquals(0);
+////        simpleComparision.setNext("ValueIsZero");
+////
+////        SimpleComparision simpleComparision1 = new SimpleComparision();
+////        simpleComparision1.setVariable("$.type");
+////        simpleComparision1.setStringEquals("Private");
+////        simpleComparision1.setNext("Public");
+////
+////        NestedComparision nestedComparision1 = new NestedComparision();
+////        SimpleComparision simpleComparision2 = new SimpleComparision();
+////        simpleComparision2.setVariable("$.type");
+////        simpleComparision2.setStringEquals("Private");
+////
+////        nestedComparision1.setNot(simpleComparision2);
+////        nestedComparision1.setNext("Public");
+////
+////        choices.add(simpleComparision);
+////        choices.add(simpleComparision1);
+////        choices.add(nestedComparision1);
+////
+////        choiceStep.setChoices(choices);
+////        Map<String,Object> stepList = new LinkedHashMap<>();
+////        stepList.put("ChoiceStateX",choiceStep);
+////        step.setStates(stepList);
+//
+//        Step step = generateStep();
+//
+//        try {
+//            String cloudFormationJson = mapper.writeValueAsString(step);
+//            System.out.println(cloudFormationJson);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    public Step generateStep() {
         FunctionOrchestrator functionOrchestrator = super.getFunctionOrchestrator();
 
         Step step = new Step();
         step.setComment(functionOrchestrator.getDescription());
-        Map<String,Object> stepList = new LinkedHashMap<>();
+        Map<String, Object> stepList = new LinkedHashMap<>();
 
-        List <FunctionStep> functionStepList = functionOrchestrator.getStepList();
+        List<FunctionStep> functionStepList = functionOrchestrator.getStepList();
         List<Comparision> comparisionList = new ArrayList<>();
         //Because first one is Choice
-        for (FunctionStep functionStep : functionStepList){
+        for (FunctionStep functionStep : functionStepList) {
             step.setStartsAt(functionStepList.get(0).getName());
-            if (functionStep instanceof IfExpr){
-                List<IfBranch> ifBranches = ((IfExpr)functionStep).getIfBranches();
-                for (IfBranch ifBranch:ifBranches){
+            if (functionStep instanceof IfExpr) {
+                List<IfBranch> ifBranches = ((IfExpr) functionStep).getIfBranches();
+                for (IfBranch ifBranch : ifBranches) {
                     Condition rootCondition = ifBranch.getCondition();
                     Comparision comparision = comparisionBuilder(rootCondition);
-                    if (comparision instanceof NestedComparision){
+                    if (comparision instanceof NestedComparision) {
                         NestedComparision nestedComparision = (NestedComparision) comparision;
                         nestedComparision.setNext(ifBranch.getSuccessBranch().getName());
                         comparisionList.add(nestedComparision);
                     } else {
-                        SimpleComparision simpleComparision = (SimpleComparision)comparision;
+                        SimpleComparision simpleComparision = (SimpleComparision) comparision;
                         simpleComparision.setNext(ifBranch.getSuccessBranch().getName());
                         comparisionList.add(simpleComparision);
                     }
                 }
                 ChoiceStep choiceStep = new ChoiceStep();
                 choiceStep.setChoices(comparisionList);
-                choiceStep.setDef(((IfExpr)functionStep).getElseBranchBody().getName());
-                stepList.put(functionStep.getName(),choiceStep);
+                choiceStep.setDef(((IfExpr) functionStep).getElseBranchBody().getName());
+                stepList.put(functionStep.getName(), choiceStep);
             }
         }
 
@@ -185,23 +187,22 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         return step;
     }
 
-
-    public Comparision comparisionBuilder (Condition condition){
+    public Comparision comparisionBuilder(Condition condition) {
         Object left = condition.getLeftSide();
         Object right = condition.getRightSide();
-        if (!(left instanceof Condition || right instanceof Condition)){
+        if (!(left instanceof Condition || right instanceof Condition)) {
             //assuming compiler validates only one side is the var
             String variable = "";
-            SimpleComparision comparision =assignEvaulator(left,condition);
-            if (comparision==null){
-                variable = (String)left;
-                comparision = assignEvaulator(right,condition);
+            SimpleComparision comparision = assignEvaulator(left, condition);
+            if (comparision == null) {
+                variable = (String) left;
+                comparision = assignEvaulator(right, condition);
             } else {
-                variable = (String)right;
+                variable = (String) right;
             }
             comparision.setVariable(variable);
 
-            if (condition.getEvaluator().equals("!=")){
+            if (condition.getEvaluator().equals("!=")) {
                 NestedComparision nestedComparision = new NestedComparision();
                 nestedComparision.setNot(comparision);
                 return nestedComparision;
@@ -209,9 +210,9 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                 return comparision;
             }
 
-        }else if (left instanceof Condition && right instanceof Condition){
-            SimpleComparision leftCompare = (SimpleComparision) comparisionBuilder((Condition)left);
-            SimpleComparision rightCompare = (SimpleComparision) comparisionBuilder((Condition)right);
+        } else if (left instanceof Condition && right instanceof Condition) {
+            SimpleComparision leftCompare = (SimpleComparision) comparisionBuilder((Condition) left);
+            SimpleComparision rightCompare = (SimpleComparision) comparisionBuilder((Condition) right);
             List<SimpleComparision> simpleComparisionList = new ArrayList<>();
             simpleComparisionList.add(leftCompare);
             simpleComparisionList.add(rightCompare);
@@ -231,10 +232,10 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             }
             return comparision;
         } else {
-            if (condition.getEvaluator().equals("!")){
-                if (left instanceof Condition){
-                    Comparision comparision = comparisionBuilder((Condition)left);
-                    if (comparision instanceof SimpleComparision){
+            if (condition.getEvaluator().equals("!")) {
+                if (left instanceof Condition) {
+                    Comparision comparision = comparisionBuilder((Condition) left);
+                    if (comparision instanceof SimpleComparision) {
                         NestedComparision nestedComparision = new NestedComparision();
                         nestedComparision.setNot((SimpleComparision) comparision);
                         return nestedComparision;
@@ -252,10 +253,11 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             }
         }
     }
-    public SimpleComparision assignEvaulator(Object left,Condition condition){
-        if (left instanceof String){
-            String leftStr = (String)left;
-            if (((String) left).startsWith("$.")){
+
+    public SimpleComparision assignEvaulator(Object left, Condition condition) {
+        if (left instanceof String) {
+            String leftStr = (String) left;
+            if (((String) left).startsWith("$.")) {
                 return null;
             } else {
                 StringComparision stringComparision = new StringComparision();
@@ -281,7 +283,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                 }
                 return stringComparision;
             }
-        } else if (left instanceof Double){
+        } else if (left instanceof Double) {
             Double leftInt = (Double) left;
             NumericComparision numericComparision = new NumericComparision();
             switch (condition.getEvaluator()) {
@@ -305,13 +307,13 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                     break;
             }
             return numericComparision;
-        } else if (left instanceof Boolean){
+        } else if (left instanceof Boolean) {
             //boolean
             Boolean leftBool = (Boolean) left;
             BooleanComparision booleanComparision = new BooleanComparision();
-            if (condition.getEvaluator().equals("==")){
+            if (condition.getEvaluator().equals("==")) {
                 booleanComparision.setBooleanEquals(leftBool);
-            } else if (condition.getEvaluator().equals("!=")){
+            } else if (condition.getEvaluator().equals("!=")) {
                 booleanComparision.setBooleanEquals(leftBool);
             }
             return booleanComparision;
@@ -321,11 +323,11 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         }
     }
 
-    public IAMRole generateLambdaIAM () {
+    public IAMRole generateLambdaIAM() {
 
         IAMStatement iamStatement = new IAMStatement();
-        Map<String,Object> princi = new LinkedHashMap<>();
-        princi.put("Service","lambda.amazonaws.com");
+        Map<String, Object> princi = new LinkedHashMap<>();
+        princi.put("Service", "lambda.amazonaws.com");
         iamStatement.setPrincipal(princi);
         iamStatement.setAction("sts:AssumeRole");
 
@@ -343,16 +345,16 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         return iamRole;
     }
 
-    public IAMRole generateStateMachineIAM () {
+    public IAMRole generateStateMachineIAM() {
 
         IAMStatement iamStatement = new IAMStatement();
         ArrayList<Object> servicesList = new ArrayList<>();
-        Map <String,String> service = new LinkedHashMap<>();
-        service.put("Fn::Sub","states.${AWS::Region}.amazonaws.com");
+        Map<String, String> service = new LinkedHashMap<>();
+        service.put("Fn::Sub", "states.${AWS::Region}.amazonaws.com");
         servicesList.add(service);
 
-        Map<String,Object> princi = new LinkedHashMap<>();
-        princi.put("Service",servicesList);
+        Map<String, Object> princi = new LinkedHashMap<>();
+        princi.put("Service", servicesList);
 
         iamStatement.setPrincipal(princi);
 
@@ -391,22 +393,22 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         return iamRole;
     }
 
-    public Map<String,Lambda> generateLambdas () {
-        Map<String,Lambda> lamdas = new LinkedHashMap<>();
-        for (Function function:functionList){
-            ArrayList<String> attributes= new ArrayList<>();
+    public Map<String, Lambda> generateLambdas() {
+        Map<String, Lambda> lamdas = new LinkedHashMap<>();
+        for (Function function : functionList) {
+            ArrayList<String> attributes = new ArrayList<>();
             attributes.add("LambdaExecutionRole"); //Permission
             attributes.add("Arn");
             LambdaRole lambdaRole = new LambdaRole(attributes);
 
             LambdaCode lambdaCode = new LambdaCode("exports.handler = (event, context, callback) => {\n    " +
-                    "callback(null, \"Hello From "+function.getName()+"!\");\n};\n");
-            LambdaProperty lambdaProperty = new LambdaProperty(function.getHandler(),lambdaRole,lambdaCode,
-                    function.getLanguage(),"25");
+                    "callback(null, \"Hello From " + function.getName() + "!\");\n};\n");
+            LambdaProperty lambdaProperty = new LambdaProperty(function.getHandler(), lambdaRole, lambdaCode,
+                    function.getLanguage(), "25");
 
             Lambda lambda = new Lambda();
             lambda.setProperties(lambdaProperty);
-            lamdas.put(function.getName(),lambda);
+            lamdas.put(function.getName(), lambda);
         }
         return lamdas;
     }
