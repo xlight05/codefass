@@ -21,9 +21,13 @@ import codegen.aws.models.formation.lambda.LambdaRole;
 import codegen.aws.models.formation.step.BooleanComparision;
 import codegen.aws.models.formation.step.ChoiceStep;
 import codegen.aws.models.formation.step.Comparision;
+import codegen.aws.models.formation.step.LambdaArn;
 import codegen.aws.models.formation.step.NestedComparision;
 import codegen.aws.models.formation.step.NumericComparision;
 import codegen.aws.models.formation.step.SimpleComparision;
+import codegen.aws.models.formation.step.StateDefString;
+import codegen.aws.models.formation.step.StateMachine;
+import codegen.aws.models.formation.step.StateProperties;
 import codegen.aws.models.formation.step.Step;
 import codegen.aws.models.formation.step.StringComparision;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -89,7 +93,8 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         objectMap.put("StatesExecutionRole",stateIAM);
 
 
-
+        StateMachine stateMachine = generateStateMachine();
+        objectMap.put("MyStateMachine",stateMachine);
 
         CloudFormation cloudFormation = new CloudFormation();
         cloudFormation.setObjectMap(objectMap);
@@ -413,7 +418,49 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         return lamdas;
     }
 
-    public void generateStateMachine() {
+    public StateMachine generateStateMachine() {
+        StateMachine stateMachine = new StateMachine();
+        StateDefString defString = new StateDefString();
+        ArrayList<Object> sub = new ArrayList<>();
 
+        Step step = generateStep();
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String stepString = mapper.writeValueAsString(step);
+
+            sub.add(stepString);
+            Map<String, LambdaArn> lambdaMap = new LinkedHashMap<>();
+
+            LambdaArn lambdaArn = new LambdaArn();
+            lambdaArn.getAttr().add("FunctionOne");
+            lambdaArn.getAttr().add("Arn");
+            lambdaMap.put("lambdaArn1",lambdaArn);
+
+            LambdaArn lambda2Arn = new LambdaArn();
+            lambda2Arn.getAttr().add("FunctionTwo");
+            lambda2Arn.getAttr().add("Arn");
+            lambdaMap.put("lambdaArn2",lambda2Arn);
+
+            sub.add(lambdaMap);
+
+            defString.setSub(sub);
+
+            StateProperties stateProperties = new StateProperties();
+            stateProperties.setStateDefString(defString);
+
+            //Map<String, LambdaArn> roleMap = new LinkedHashMap<>();
+            LambdaArn roleArn = new LambdaArn();
+            roleArn.getAttr().add("StatesExecutionRole");
+            roleArn.getAttr().add("Arn");
+            //roleMap.put("RoleArn",roleArn);
+
+            stateProperties.setRoleMap(roleArn);
+            stateMachine.setProperties(stateProperties);
+            return stateMachine;
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

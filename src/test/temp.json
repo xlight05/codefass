@@ -108,6 +108,36 @@
           }
         ]
       }
+    },
+    "MyStateMachine": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Sub": [
+            "{\"Comment\":\"Test Desc\",\"StartAt\":\"ChoiceBlock\",\"States\":{\"ChoiceBlock\":{\"Type\":\"Choice\",\"Choices\":[{\"Not\":{\"Variable\":\"$.var\",\"StringEquals\":\"ew\"},\"Next\":\"s1\"},{\"Not\":{\"Variable\":\"$.var\",\"NumericEquals\":25.0},\"Next\":\"s2\"}],\"Default\":\"s3\"}}}",
+            {
+              "lambdaArn1": {
+                "Fn::GetAtt": [
+                  "FunctionOne",
+                  "Arn"
+                ]
+              },
+              "lambdaArn2": {
+                "Fn::GetAtt": [
+                  "FunctionTwo",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "StatesExecutionRole",
+            "Arn"
+          ]
+        }
+      }
     }
   }
 }
