@@ -412,4 +412,8 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         }
         return lamdas;
     }
+
+    public void generateStateMachine() {
+
+    }
 }
