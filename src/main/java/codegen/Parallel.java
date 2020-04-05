@@ -1,9 +1,10 @@
 package codegen;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Parallel extends FunctionStep {
+public class Parallel extends FunctionStep implements Serializable {
     private List<Function> functionList;
 
     public Parallel(String name) {

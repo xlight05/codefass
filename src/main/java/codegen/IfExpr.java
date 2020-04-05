@@ -1,8 +1,9 @@
 package codegen;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class IfExpr extends FunctionStep{
+public class IfExpr extends FunctionStep implements Serializable {
     private List<IfBranch> ifBranches;
     private FunctionStep elseBranchBody;
 

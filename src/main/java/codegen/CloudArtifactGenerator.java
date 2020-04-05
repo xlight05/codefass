@@ -1,6 +1,8 @@
 package codegen;
 
-public abstract class CloudArtifactGenerator {
+import java.io.Serializable;
+
+public abstract class CloudArtifactGenerator implements Serializable {
     private FunctionOrchestrator functionOrchestrator;
 
     public CloudArtifactGenerator(FunctionOrchestrator functionOrchestrator) {

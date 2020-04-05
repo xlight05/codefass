@@ -1,9 +1,10 @@
 package codegen;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Sequence extends FunctionStep {
+public class Sequence extends FunctionStep implements Serializable {
     private List<Function> functionList;
 
     public Sequence(String name) {

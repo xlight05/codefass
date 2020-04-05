@@ -10,7 +10,14 @@ import codegen.Sequence;
 import fass.FassBaseVisitor;
 import fass.FassParser;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +35,33 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     public EvalVisitor() {
         super();
-        functionOrchestrator = new FunctionOrchestrator("Test Name","Test Desc","1.0.0");
+        functionOrchestrator = new FunctionOrchestrator("Test Name", "Test Desc", "1.0.0");
+    }
+
+    @Override
+    public Value visitOrchestrate_def(FassParser.Orchestrate_defContext ctx) {
+        System.out.println("In Orc");
+        List<TerminalNode> paramList = ctx.param_block().ID();
+        for (TerminalNode node : paramList) {
+            node.getText();
+            //TODO Fix params logic
+        }
+        List<FassParser.StatContext> stats = ctx.stat_block().block().stat();
+        for (FassParser.StatContext stat : stats) {
+            if (stat.if_stat() != null) {
+                //this.visit(stat.if_stat());
+            }
+            //TODO add others
+        }
+
+        return super.visitOrchestrate_def(ctx);
+    }
+
+    @Override
+    public Value visitImport_def(FassParser.Import_defContext ctx) {
+        String moduleName = ctx.ID().getText();
+
+        return super.visitImport_def(ctx);
     }
 
     // assignment/id overrides
@@ -43,7 +76,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
     public Value visitIdAtom(FassParser.IdAtomContext ctx) {
         String id = ctx.getText();
         Value value = memory.get(id);
-        if(value == null) {
+        if (value == null) {
             throw new RuntimeException("no such variable: " + id);
         }
         return value;
@@ -86,8 +119,8 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
     public Value visitNotExpr(FassParser.NotExprContext ctx) {
         Value value = this.visit(ctx.expr());
         //System.out.println("In Not");
-        String evaluator="!";
-        Condition condition = new Condition(value.value,null,evaluator);
+        String evaluator = "!";
+        Condition condition = new Condition(value.value, null, evaluator);
         return new Value(condition);
     }
 
@@ -96,21 +129,21 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         //System.out.println("In multi");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-        String evaluator="";
+        String evaluator = "";
         switch (ctx.op.getType()) {
             case FassParser.MULT:
-                evaluator= "*";
+                evaluator = "*";
                 break;
             case FassParser.DIV:
-                evaluator="/";
+                evaluator = "/";
                 break;
             case FassParser.MOD:
-                evaluator="%";
+                evaluator = "%";
                 break;
             default:
                 //throw new RuntimeException("unknown operator: " + FassParser.tokenNames[ctx.op.getType()]);
         }
-        Condition condition = new Condition(left.value,right.value,evaluator);
+        Condition condition = new Condition(left.value, right.value, evaluator);
         return new Value(condition);
     }
 
@@ -137,7 +170,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         //System.out.println("In Relational");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-        String evaluator ="";
+        String evaluator = "";
         switch (ctx.op.getType()) {
             case FassParser.LT:
                 evaluator = "<";
@@ -151,7 +184,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
             case FassParser.GTEQ:
                 evaluator = ">=";
         }
-        Condition condition = new Condition(left,right,evaluator);
+        Condition condition = new Condition(left, right, evaluator);
         return new Value(condition);
     }
 
@@ -160,16 +193,16 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         //System.out.println("In Equality");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-        String evaluator ="";
+        String evaluator = "";
         switch (ctx.op.getType()) {
             case FassParser.EQ:
-                evaluator="==";
+                evaluator = "==";
                 break;
             case FassParser.NEQ:
-                evaluator="!=";
+                evaluator = "!=";
                 break;
         }
-        Condition condition = new Condition(left.value,right.value,evaluator);
+        Condition condition = new Condition(left.value, right.value, evaluator);
         return new Value((condition));
     }
 
@@ -178,7 +211,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         //System.out.println("In AND");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-        Condition condition = new Condition(left.value,right.value,"&&");
+        Condition condition = new Condition(left.value, right.value, "&&");
         return new Value(condition);
     }
 
@@ -187,7 +220,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         //System.out.println("In OR");
         Value left = this.visit(ctx.expr(0));
         Value right = this.visit(ctx.expr(1));
-        Condition condition = new Condition(left.value,right.value,"||");
+        Condition condition = new Condition(left.value, right.value, "||");
         return new Value(condition);
     }
 
@@ -228,18 +261,20 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     @Override
     public Value visitIf_stat(FassParser.If_statContext ctx) {
+        System.out.println("In If");
         List<FassParser.Condition_blockContext> condition_block = ctx.condition_block();
         IfExpr ifExpr = new IfExpr("ChoiceBlock"); //TODO check
         List<IfBranch> ifBranches = new ArrayList<>();
 //        FassParser.Condition_blockContext firstIfCondition = condition_block.get(0);
 //        System.out.println(this.visit(firstIfCondition.expr()));
-        for (FassParser.Condition_blockContext ifCondition : condition_block){ //If and else if
-            Condition condition = (Condition)this.visit(ifCondition.expr()).value;
+        for (FassParser.Condition_blockContext ifCondition : condition_block) { //If and else if
+            Condition condition = (Condition) this.visit(ifCondition.expr()).value;
 
-            List<FassParser.StatContext> stats = ifCondition.stat_block().block().stat();//Probably avoid multiple sequences
+            List<FassParser.StatContext> stats = ifCondition.stat_block().block().stat();//Probably avoid
+            // multiple sequences
             Sequence sequence = null;
-            for (FassParser.StatContext stat:stats){
-                if (stat.ID() != null){
+            for (FassParser.StatContext stat : stats) {
+                if (stat.ID() != null) {
                     String sequenceId = stat.ID().getText();
                     sequence = (Sequence) memory.get(sequenceId).value;//Add support for not just seq
                 } else {
@@ -254,7 +289,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         }
         ifExpr.setIfBranches(ifBranches);
         //assuming has else
-        String sequenceId =ctx.stat_block().block().stat().get(0).ID().getText();
+        String sequenceId = ctx.stat_block().block().stat().get(0).ID().getText();
         Sequence sequence = (Sequence) memory.get(sequenceId).value;
         ifExpr.setElseBranchBody(sequence);
         functionOrchestrator.getStepList().add(ifExpr);
@@ -267,7 +302,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
         Value value = this.visit(ctx.expr());
 
-        while(value.asBoolean()) {
+        while (value.asBoolean()) {
 
             // evaluate the code block
             this.visit(ctx.stat_block());
@@ -285,19 +320,18 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         List<FassParser.Function_statContext> functionContents =
                 ctx.function_block().function_repeat().function_stat();
 
-
         String name = "";
         String handler = "";
         //TODO check
-        for (FassParser.Function_statContext function:functionContents){
-            if (function.function_name() != null){
-                name = function.function_name().STRING().getText().replace("\"","");
-            } else if (function.function_handler() != null){
-                handler = function.function_handler().STRING().getText().replace("\"","");
+        for (FassParser.Function_statContext function : functionContents) {
+            if (function.function_name() != null) {
+                name = function.function_name().STRING().getText().replace("\"", "");
+            } else if (function.function_handler() != null) {
+                handler = function.function_handler().STRING().getText().replace("\"", "");
             }
         }
-        Function func = new Function(name,handler,"nodejs12.x","index.js");
-        memory.put(id,new Value(func));
+        Function func = new Function(name, handler, "nodejs12.x", "index.js");
+        memory.put(id, new Value(func));
         return super.visitFunction_def(ctx);
     }
 
@@ -307,10 +341,10 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         List<FassParser.Sequence_statContext> sequenceElements =
                 ctx.sequence_block().sequence_repeat().sequence_stat();
         Sequence sequence = new Sequence(id);
-        List<Function> functionList = new ArrayList <>();
-        for (FassParser.Sequence_statContext functionElement:sequenceElements){
+        List<Function> functionList = new ArrayList<>();
+        for (FassParser.Sequence_statContext functionElement : sequenceElements) {
             String elementKey = functionElement.ID().getText();
-            if (memory.containsKey(elementKey)){
+            if (memory.containsKey(elementKey)) {
                 Function function = (Function) memory.get(elementKey).value;
                 functionList.add(function);
             } else {
@@ -318,7 +352,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
             }
         }
         sequence.setFunctionList(functionList);
-        memory.put(id,new Value(sequence));
+        memory.put(id, new Value(sequence));
         return super.visitSequence_def(ctx);
     }
 
@@ -328,10 +362,10 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         List<FassParser.Parallel_statContext> parallelElements =
                 ctx.parallel_block().parallel_repeat().parallel_stat();
         Parallel parallel = new Parallel(id);
-        List<Function> functionList = new ArrayList <>();
-        for (FassParser.Parallel_statContext functionElement:parallelElements){
+        List<Function> functionList = new ArrayList<>();
+        for (FassParser.Parallel_statContext functionElement : parallelElements) {
             String elementKey = functionElement.ID().getText();
-            if (memory.containsKey(elementKey)){
+            if (memory.containsKey(elementKey)) {
                 Function function = (Function) memory.get(elementKey).value;
                 functionList.add(function);
             } else {
@@ -339,7 +373,13 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
             }
         }
         parallel.setFunctionList(functionList);
-        memory.put(id,new Value(parallel));
+        memory.put(id, new Value(parallel));
         return super.visitParallel_def(ctx);
     }
+
+//    private static File fileWithDirectoryAssurance(String directory, String filename) {
+//        File dir = new File(directory);
+//        if (!dir.exists()) dir.mkdirs();
+//        return new File(directory + "/" + filename);
+//    }
 }

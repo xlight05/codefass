@@ -1,6 +1,8 @@
 package codegen;
 
-public abstract class FunctionStep {
+import java.io.Serializable;
+
+public abstract class FunctionStep implements Serializable {
     private String name;
 
     public FunctionStep(String name) {

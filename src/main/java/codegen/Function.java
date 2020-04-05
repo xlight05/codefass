@@ -2,7 +2,9 @@ package codegen;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Function{
+import java.io.Serializable;
+
+public class Function implements Serializable {
     @JsonIgnore
     private String name;
     private String handler;

@@ -1,6 +1,8 @@
 package codegen;
 
-public class Condition {
+import java.io.Serializable;
+
+public class Condition implements Serializable {
     private Object leftSide;
     private Object rightSide;
     private String evaluator;

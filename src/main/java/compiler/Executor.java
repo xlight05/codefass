@@ -1,7 +1,12 @@
 package compiler;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.lang.Exception;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import codegen.FunctionOrchestrator;
 import fass.FassLexer;
@@ -30,7 +35,8 @@ public class Executor {
 
     public FunctionOrchestrator compile() throws IOException {
 
-        String args = "src/main/fass/andIf.fass";
+        //String args = "src/main/fass/andIf.fass";
+        String args = "test.fass";
         System.out.println("parsing: " + args);
 
         FassLexer lexer = null;
@@ -40,6 +46,16 @@ public class Executor {
         EvalVisitor visitor = new EvalVisitor();
         visitor.visit(tree);
         FunctionOrchestrator functionOrchestrator = EvalVisitor.functionOrchestrator;
+        try {
+            Files.createDirectories(Paths.get("build"));
+            FileOutputStream f = new FileOutputStream(new File("build/object.txt"));
+            ObjectOutputStream o = new ObjectOutputStream(f);
+            o.writeObject(functionOrchestrator);
+            o.close();
+            f.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return functionOrchestrator;
     }
 }

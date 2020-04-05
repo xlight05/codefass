@@ -1,8 +1,9 @@
 package codegen;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class IfBranch {
+public class IfBranch implements Serializable {
     private Condition condition;
     private FunctionStep successBranch;
 
