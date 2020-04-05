@@ -46,14 +46,15 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
             node.getText();
             //TODO Fix params logic
         }
-        List<FassParser.StatContext> stats = ctx.stat_block().block().stat();
-        for (FassParser.StatContext stat : stats) {
+        List<FassParser.Orchestrate_statContext> stats = ctx.orchestrate_block().orc_block().orchestrate_stat();
+        for (FassParser.Orchestrate_statContext stat : stats) {
             if (stat.if_stat() != null) {
-                //this.visit(stat.if_stat());
+                this.visit(stat.if_stat());
             }
             //TODO add others
         }
 
+        System.out.println(functionOrchestrator);
         return super.visitOrchestrate_def(ctx);
     }
 
@@ -270,17 +271,20 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         for (FassParser.Condition_blockContext ifCondition : condition_block) { //If and else if
             Condition condition = (Condition) this.visit(ifCondition.expr()).value;
 
-            List<FassParser.StatContext> stats = ifCondition.stat_block().block().stat();//Probably avoid
+            List<FassParser.Orchestrate_statContext> stats = ifCondition.orchestrate_block().orc_block().orchestrate_stat();//Probably avoid
             // multiple sequences
             Sequence sequence = null;
-            for (FassParser.StatContext stat : stats) {
-                if (stat.ID() != null) {
-                    String sequenceId = stat.ID().getText();
-                    sequence = (Sequence) memory.get(sequenceId).value;//Add support for not just seq
-                } else {
-                    //Fill
-                    System.out.println("Not a ID");
+            for (FassParser.Orchestrate_statContext stat : stats) {
+                if (stat.sequence_def() != null){
+                    sequence =  (Sequence) this.visit(stat.sequence_def()).value;
                 }
+//                if (stat.ID() != null) {
+//                    String sequenceId = stat.ID().getText();
+//                    sequence = (Sequence) memory.get(sequenceId).value;//Add support for not just seq
+//                } else {
+//                    //Fill
+//                    System.out.println("Not a ID");
+//                }
             }
 
             IfBranch ifBranch = new IfBranch(condition);
@@ -289,8 +293,10 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         }
         ifExpr.setIfBranches(ifBranches);
         //assuming has else
-        String sequenceId = ctx.stat_block().block().stat().get(0).ID().getText();
-        Sequence sequence = (Sequence) memory.get(sequenceId).value;
+        Sequence sequence =
+                (Sequence) this.visit(ctx.orchestrate_block().orc_block().orchestrate_stat().get(0).sequence_def()).value;
+////        String sequenceId = ctx.stat_block().block().stat().get(0).ID().getText();
+////        Sequence sequence = (Sequence) memory.get(sequenceId).value;
         ifExpr.setElseBranchBody(sequence);
         functionOrchestrator.getStepList().add(ifExpr);
         return super.visitIf_stat(ctx);
@@ -353,7 +359,8 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         }
         sequence.setFunctionList(functionList);
         memory.put(id, new Value(sequence));
-        return super.visitSequence_def(ctx);
+        //return super.visitSequence_def(ctx);
+        return new Value(sequence);
     }
 
     @Override

@@ -9,7 +9,21 @@ import_def
 ;
 
 orchestrate_def
-: ORCHESTRATE param_block stat_block
+: ORCHESTRATE param_block orchestrate_block
+;
+
+orchestrate_block
+ : OBRACE orc_block CBRACE
+ ;
+
+orc_block
+ : orchestrate_stat*
+ ;
+
+orchestrate_stat
+: if_stat
+| function_def
+| sequence_def
 ;
 
 param_block
@@ -94,11 +108,11 @@ block
 
 stat
  : assignment
- | if_stat
+// | if_stat
  | while_stat
  | log
  | function_def
- | sequence_def
+// | sequence_def
  | import_def
  | orchestrate_def
  | ID
@@ -110,11 +124,11 @@ assignment
  ;
 
 if_stat
- : IF condition_block (ELSE IF condition_block)* (ELSE stat_block)?
+ : IF condition_block (ELSE IF condition_block)* (ELSE orchestrate_block)?
  ;
 
 condition_block
- : expr stat_block
+ : expr orchestrate_block
  ;
 
 stat_block
