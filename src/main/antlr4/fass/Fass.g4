@@ -4,6 +4,18 @@ parse
  : block EOF
  ;
 
+import_def
+: IMPORT ID
+;
+
+orchestrate_def
+: ORCHESTRATE param_block stat_block
+;
+
+param_block
+ : OPAR (ID COMMA?)* CPAR
+ ;
+
 sequence_def
 : SEQUENCE ID ASSIGN sequence_block SCOL
 ;
@@ -87,6 +99,8 @@ stat
  | log
  | function_def
  | sequence_def
+ | import_def
+ | orchestrate_def
  | ID
  | OTHER {System.err.println("unknown char: " + $OTHER.text);}
  ;
@@ -160,6 +174,7 @@ OBRACE : '{';
 CBRACE : '}';
 SOBRACE : '[';
 SCBRACE : ']';
+COMMA : ',';
 
 TRUE : 'true';
 FALSE : 'false';
@@ -168,10 +183,16 @@ IF : 'if';
 ELSE : 'else';
 WHILE : 'while';
 LOG : 'log';
+ORCHESTRATE : 'orchestrate';
+IMPORT : 'import';
 
 ID
  : [a-zA-Z_] [a-zA-Z_0-9]*
  ;
+
+PARAM
+: [a-zA-Z_] [a-zA-Z_0-9]*
+;
 
 INT
  : [0-9]+
