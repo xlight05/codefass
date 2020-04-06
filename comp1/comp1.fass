@@ -1,5 +1,3 @@
-import comp1
-
 n = 9;
 
 function f1 = {

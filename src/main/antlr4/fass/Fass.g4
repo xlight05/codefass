@@ -108,11 +108,9 @@ block
 
 stat
  : assignment
-// | if_stat
  | while_stat
  | log
  | function_def
-// | sequence_def
  | import_def
  | orchestrate_def
  | ID

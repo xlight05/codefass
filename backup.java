@@ -8,12 +8,8 @@ import codegen.IfExpr;
 import codegen.Parallel;
 import codegen.Sequence;
 import fass.FassBaseVisitor;
-import fass.FassLexer;
 import fass.FassParser;
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.File;
@@ -34,9 +30,8 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     // store variables (there's only one global scope!)
     private Map<String, Value> memory = new HashMap<String, Value>();
-    private Map<String, FunctionOrchestrator> imports = new HashMap<String, FunctionOrchestrator>();
 
-    public FunctionOrchestrator functionOrchestrator;
+    public static FunctionOrchestrator functionOrchestrator;
 
     public EvalVisitor() {
         super();
@@ -59,51 +54,14 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
             //TODO add others
         }
 
-        try {
-            //TODO module name
-            Files.createDirectories(Paths.get("build"));
-            FileOutputStream f = new FileOutputStream(new File("build/object.txt"));
-            ObjectOutputStream o = new ObjectOutputStream(f);
-            o.writeObject(functionOrchestrator);
-            o.close();
-            f.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new Value (functionOrchestrator);
+        System.out.println(functionOrchestrator);
+        return super.visitOrchestrate_def(ctx);
     }
 
     @Override
     public Value visitImport_def(FassParser.Import_defContext ctx) {
-        try {
-            String moduleName = ctx.ID().getText();
+        String moduleName = ctx.ID().getText();
 
-            String args = moduleName+"/"+moduleName+".fass";
-            FassLexer lexer = new FassLexer(new ANTLRFileStream(args));
-            FassParser parser = new FassParser(new CommonTokenStream(lexer));
-            ParseTree tree = parser.parse();
-            EvalVisitor visitor = new EvalVisitor();
-            visitor.visit(tree);
-            FunctionOrchestrator importOrc = visitor.functionOrchestrator;
-            imports.put(moduleName,importOrc);
-
-
-
-//            try {
-//                Files.createDirectories(Paths.get(moduleName+"/build"));
-//                FileOutputStream f = new FileOutputStream(new File(moduleName+"/build/object.txt"));
-//                ObjectOutputStream o = new ObjectOutputStream(f);
-//                o.writeObject(functionOrchestrator);
-//                o.close();
-//                f.close();
-//
-//                //read now
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return super.visitImport_def(ctx);
     }
 
