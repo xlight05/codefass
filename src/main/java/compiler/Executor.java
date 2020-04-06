@@ -39,8 +39,7 @@ public class Executor {
         String args = "test.fass";
         System.out.println("parsing: " + args);
 
-        FassLexer lexer = null;
-        lexer = new FassLexer(new ANTLRFileStream(args));
+        FassLexer lexer = new FassLexer(new ANTLRFileStream(args));
         FassParser parser = new FassParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.parse();
         EvalVisitor visitor = new EvalVisitor();

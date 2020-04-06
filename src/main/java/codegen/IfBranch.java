@@ -1,11 +1,13 @@
 package codegen;
 
+import sun.plugin.javascript.navig.Array;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class IfBranch implements Serializable {
     private Condition condition;
-    private FunctionStep successBranch;
+    private ArrayList<FunctionStep> successBranch;
 
     public IfBranch(Condition condition) {
         this.condition = condition;
@@ -19,18 +21,17 @@ public class IfBranch implements Serializable {
         this.condition = condition;
     }
 
-    public FunctionStep getSuccessBranch() {
+    public ArrayList<FunctionStep> getSuccessBranch() {
         return successBranch;
     }
 
-    public void setSuccessBranch(FunctionStep successBranch) {
+    public void setSuccessBranch(ArrayList<FunctionStep> successBranch) {
         this.successBranch = successBranch;
     }
 
-
     @Override
     public String toString() {
-        return "Choice{" +
+        return "IfBranch{" +
                 "condition=" + condition +
                 ", successBranch=" + successBranch +
                 '}';

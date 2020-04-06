@@ -1,6 +1,7 @@
 package compiler;
 
 import codegen.FunctionOrchestrator;
+import codegen.FunctionStep;
 import codegen.IfBranch;
 import codegen.Condition;
 import codegen.Function;
@@ -304,7 +305,6 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     //@Override
     public Value visitIf_stat1(FassParser.If_statContext ctx) {
-        System.out.println("In If");
         List<FassParser.Condition_blockContext> condition_block = ctx.condition_block();
         IfExpr ifExpr = new IfExpr("ChoiceBlock"); //TODO check
         List<IfBranch> ifBranches = new ArrayList<>();
@@ -315,31 +315,43 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
             List<FassParser.Orchestrate_statContext> stats = ifCondition.orchestrate_block().orc_block().orchestrate_stat();//Probably avoid
             // multiple sequences
-            Sequence sequence = null;
+            ArrayList <FunctionStep> step = new ArrayList<>();
             for (FassParser.Orchestrate_statContext stat : stats) {
                 if (stat.sequence_def() != null){
-                    sequence =  (Sequence) this.visit(stat.sequence_def()).value;
+                    Sequence sequence =  (Sequence) this.visitSequence_def1(stat.sequence_def()).value;
+                    step.add(sequence);
+                } else if (stat.parallel_def() != null){
+                    Parallel parallel =  (Parallel) this.visitParallel_def1(stat.parallel_def()).value;
+                    step.add(parallel);
+                } else if (stat.start_import() != null){
+                    FunctionOrchestrator importedObj = imports.get(stat.start_import().ID().getText());
+                    ArrayList<FunctionStep> stepList = importedObj.getStepList();
+                    step.addAll(stepList);
                 }
-//                if (stat.ID() != null) {
-//                    String sequenceId = stat.ID().getText();
-//                    sequence = (Sequence) memory.get(sequenceId).value;//Add support for not just seq
-//                } else {
-//                    //Fill
-//                    System.out.println("Not a ID");
-//                }
             }
 
             IfBranch ifBranch = new IfBranch(condition);
-            ifBranch.setSuccessBranch(sequence);
+
+            ifBranch.setSuccessBranch(step);
             ifBranches.add(ifBranch);
         }
         ifExpr.setIfBranches(ifBranches);
         //assuming has else
-        Sequence sequence =
-                (Sequence) this.visit(ctx.orchestrate_block().orc_block().orchestrate_stat().get(0).sequence_def()).value;
-////        String sequenceId = ctx.stat_block().block().stat().get(0).ID().getText();
-////        Sequence sequence = (Sequence) memory.get(sequenceId).value;
-        ifExpr.setElseBranchBody(sequence);
+
+        FassParser.Orchestrate_statContext stat = ctx.orchestrate_block().orc_block().orchestrate_stat().get(0);
+        ArrayList <FunctionStep> step = new ArrayList<>();
+        if (stat.sequence_def() != null){
+            Sequence sequence =  (Sequence) this.visitSequence_def1(stat.sequence_def()).value;
+            step.add(sequence);
+        } else if (stat.parallel_def() != null){
+            Parallel parallel =  (Parallel) this.visitParallel_def1(stat.parallel_def()).value;
+            step.add(parallel);
+        } else if (stat.start_import() != null){
+            FunctionOrchestrator importedObj = imports.get(stat.start_import().ID().getText());
+            ArrayList<FunctionStep> stepList = importedObj.getStepList();
+            step.addAll(stepList);
+        }
+        ifExpr.setElseBranchBody(step);
         functionOrchestrator.getStepList().add(ifExpr);
         return super.visitIf_stat(ctx);
     }
@@ -383,9 +395,9 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         return super.visitFunction_def(ctx);
     }
 
-    @Override
-    public Value visitSequence_def(FassParser.Sequence_defContext ctx) {
+    public Value visitSequence_def1(FassParser.Sequence_defContext ctx) {
         String id = ctx.ID().getText();
+        System.out.println("In seq "+id);
         List<FassParser.Sequence_statContext> sequenceElements =
                 ctx.sequence_block().sequence_repeat().sequence_stat();
         Sequence sequence = new Sequence(id);
@@ -405,8 +417,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         return new Value(sequence);
     }
 
-    @Override
-    public Value visitParallel_def(FassParser.Parallel_defContext ctx) {
+    public Value visitParallel_def1(FassParser.Parallel_defContext ctx) {
         String id = ctx.ID().getText();
         List<FassParser.Parallel_statContext> parallelElements =
                 ctx.parallel_block().parallel_repeat().parallel_stat();
@@ -423,7 +434,8 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         }
         parallel.setFunctionList(functionList);
         memory.put(id, new Value(parallel));
-        return super.visitParallel_def(ctx);
+        //return super.visitParallel_def(ctx);
+        return new Value(parallel);
     }
 
 //    private static File fileWithDirectoryAssurance(String directory, String filename) {

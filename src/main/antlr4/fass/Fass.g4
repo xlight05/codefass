@@ -8,6 +8,10 @@ import_def
 : IMPORT ID
 ;
 
+start_import
+:START ID
+;
+
 orchestrate_def
 : ORCHESTRATE param_block orchestrate_block
 ;
@@ -22,8 +26,9 @@ orc_block
 
 orchestrate_stat
 : if_stat
-| function_def
 | sequence_def
+| parallel_def
+| start_import
 ;
 
 param_block
@@ -197,6 +202,7 @@ WHILE : 'while';
 LOG : 'log';
 ORCHESTRATE : 'orchestrate';
 IMPORT : 'import';
+START : 'start';
 
 ID
  : [a-zA-Z_] [a-zA-Z_0-9]*

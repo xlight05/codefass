@@ -90,67 +90,67 @@ public class FassBuildAws implements Runnable {
         return  testWorkflow;
     }
 
-    public static FunctionOrchestrator testChoiceFlow () {
-        FunctionOrchestrator testWorkflow = new FunctionOrchestrator("Test Choice Workflow", "Test " +
-                "workflow to test the Choice flow", "1.0.0");
-        ArrayList<FunctionStep> stepList = new ArrayList<>();
-
-        Condition condition = new Condition("25","55",">=");
-        IfExpr ifExpr = new IfExpr("TestChoice");
-        ifExpr.setName("ChoiceStep1");
-
-        IfBranch ifBranch = new IfBranch(condition);
-        Parallel parallel = new Parallel("p1");
-
-        Function f1 = new Function("Success Parrarel Function 1","index.handler","nodejs12.x","exports.handler = (event, " +
-                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
-        Function f2 = new Function("Success Parrarel Function 2","index.handler","nodejs12.x","exports.handler = (event, " +
-                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
-        Function f3 = new Function("Success Parrarel  Function 3","index.handler","nodejs12.x","exports.handler = (event, " +
-                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
-
-        ArrayList<Function> successFunctionList = new ArrayList<>();
-        successFunctionList.add(f1);
-        successFunctionList.add(f2);
-        successFunctionList.add(f3);
-
-        parallel.setFunctionList(successFunctionList);
-
-        ifBranch.setSuccessBranch(parallel);
-
-        Sequence sequence = new Sequence("s1");
-
-        Function fs1 = new Function("Success Seq Function 1","index.handler","nodejs12.x","exports.handler = (event, " +
-                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
-        Function fs2 = new Function("Success Seq Function 2","index.handler","nodejs12.x","exports.handler = (event, " +
-                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
-        Function fs3 = new Function("Success Seq  Function 3","index.handler","nodejs12.x","exports.handler = (event, " +
-                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
-
-        ArrayList<Function> failureFunctionList = new ArrayList<>();
-        failureFunctionList.add(fs1);
-        failureFunctionList.add(fs2);
-        failureFunctionList.add(fs3);
-
-        sequence.setFunctionList(failureFunctionList);
-        ifExpr.setElseBranchBody(sequence);
-
-        Condition condition1 = new Condition("25","55","==");
-
-        IfBranch ifBranch1 = new IfBranch(condition1);
-        ifBranch1.setSuccessBranch(sequence);
-
-        List<IfBranch> ifBranches = new ArrayList<>();
-        ifBranches.add(ifBranch);
-        ifBranches.add(ifBranch1);
-
-        ifExpr.setIfBranches(ifBranches);
-
-        stepList.add(ifExpr);
-
-        testWorkflow.setStepList(stepList);
-        return  testWorkflow;
-    }
+//    public static FunctionOrchestrator testChoiceFlow () {
+//        FunctionOrchestrator testWorkflow = new FunctionOrchestrator("Test Choice Workflow", "Test " +
+//                "workflow to test the Choice flow", "1.0.0");
+//        ArrayList<FunctionStep> stepList = new ArrayList<>();
+//
+//        Condition condition = new Condition("25","55",">=");
+//        IfExpr ifExpr = new IfExpr("TestChoice");
+//        ifExpr.setName("ChoiceStep1");
+//
+//        IfBranch ifBranch = new IfBranch(condition);
+//        Parallel parallel = new Parallel("p1");
+//
+//        Function f1 = new Function("Success Parrarel Function 1","index.handler","nodejs12.x","exports.handler = (event, " +
+//                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+//        Function f2 = new Function("Success Parrarel Function 2","index.handler","nodejs12.x","exports.handler = (event, " +
+//                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+//        Function f3 = new Function("Success Parrarel  Function 3","index.handler","nodejs12.x","exports.handler = (event, " +
+//                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+//
+//        ArrayList<Function> successFunctionList = new ArrayList<>();
+//        successFunctionList.add(f1);
+//        successFunctionList.add(f2);
+//        successFunctionList.add(f3);
+//
+//        parallel.setFunctionList(successFunctionList);
+//
+//        ifBranch.setSuccessBranch(parallel);
+//
+//        Sequence sequence = new Sequence("s1");
+//
+//        Function fs1 = new Function("Success Seq Function 1","index.handler","nodejs12.x","exports.handler = (event, " +
+//                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+//        Function fs2 = new Function("Success Seq Function 2","index.handler","nodejs12.x","exports.handler = (event, " +
+//                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+//        Function fs3 = new Function("Success Seq  Function 3","index.handler","nodejs12.x","exports.handler = (event, " +
+//                "context, callback) => {\n    callback(null, \"Hello From One!\");\n};\n");
+//
+//        ArrayList<Function> failureFunctionList = new ArrayList<>();
+//        failureFunctionList.add(fs1);
+//        failureFunctionList.add(fs2);
+//        failureFunctionList.add(fs3);
+//
+//        sequence.setFunctionList(failureFunctionList);
+//        ifExpr.setElseBranchBody(sequence);
+//
+//        Condition condition1 = new Condition("25","55","==");
+//
+//        IfBranch ifBranch1 = new IfBranch(condition1);
+//        ifBranch1.setSuccessBranch(sequence);
+//
+//        List<IfBranch> ifBranches = new ArrayList<>();
+//        ifBranches.add(ifBranch);
+//        ifBranches.add(ifBranch1);
+//
+//        ifExpr.setIfBranches(ifBranches);
+//
+//        stepList.add(ifExpr);
+//
+//        testWorkflow.setStepList(stepList);
+//        return  testWorkflow;
+//    }
 
 //    public static FunctionOrchestrator testComplexChoiceFlow () {
 //        FunctionOrchestrator testWorkflow = new FunctionOrchestrator("Test Choice Workflow", "Test " +

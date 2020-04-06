@@ -1,11 +1,12 @@
 package codegen;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class IfExpr extends FunctionStep implements Serializable {
     private List<IfBranch> ifBranches;
-    private FunctionStep elseBranchBody;
+    private ArrayList<FunctionStep> elseBranchBody;
 
     public IfExpr(String name) {
         super(name);
@@ -19,11 +20,11 @@ public class IfExpr extends FunctionStep implements Serializable {
         this.ifBranches = ifBranches;
     }
 
-    public FunctionStep getElseBranchBody() {
+    public ArrayList<FunctionStep> getElseBranchBody() {
         return elseBranchBody;
     }
 
-    public void setElseBranchBody(FunctionStep elseBranchBody) {
+    public void setElseBranchBody(ArrayList<FunctionStep> elseBranchBody) {
         this.elseBranchBody = elseBranchBody;
     }
 
