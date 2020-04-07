@@ -1,43 +1,41 @@
 {
   "Comment": "Test Desc",
-  "StartAt": "p1",
+  "StartAt": "ChoiceBlock",
   "States": {
-    "p1": {
-      "Type": "Parallel",
+    "function oneeee": {
+      "Type": "Task",
       "Resource": "lambdaArn",
-      "End": true,
-      "Branch": [
+      "Next": "function threee"
+    },
+    "function twoo": {
+      "Type": "Task",
+      "Resource": "lambdaArn",
+      "Next": "function threee"
+    },
+    "function threee": {
+      "Type": "Task",
+      "Resource": "lambdaArn",
+      "End": true
+    },
+    "ChoiceBlock": {
+      "Type": "Choice",
+      "Choices": [
         {
-          "StartAt": "function oneeee",
-          "States": {
-            "function oneeee": {
-              "Type": "Task",
-              "Resource": "LambdaArn",
-              "End": true
-            }
-          }
+          "Not": {
+            "Variable": "$.var",
+            "StringEquals": "ew"
+          },
+          "Next": "function oneeee"
         },
         {
-          "StartAt": "function twoo",
-          "States": {
-            "function twoo": {
-              "Type": "Task",
-              "Resource": "LambdaArn",
-              "End": true
-            }
-          }
-        },
-        {
-          "StartAt": "function threee",
-          "States": {
-            "function threee": {
-              "Type": "Task",
-              "Resource": "LambdaArn",
-              "End": true
-            }
-          }
+          "Not": {
+            "Variable": "$.var",
+            "NumericEquals": 25.0
+          },
+          "Next": "function oneeee"
         }
-      ]
+      ],
+      "Default": "function twoo"
     }
   }
 }

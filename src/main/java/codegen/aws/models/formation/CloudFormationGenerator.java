@@ -177,52 +177,56 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                     Comparision comparision = comparisionBuilder(rootCondition);
                     if (comparision instanceof NestedComparision) {
                         NestedComparision nestedComparision = (NestedComparision) comparision;
-                        nestedComparision.setNext(ifBranch.getSuccessBranch().get(0).getName());
+                        if (ifBranch.getSuccessBranch().get(0) instanceof Sequence){
+                            nestedComparision.setNext(((Sequence) ifBranch.getSuccessBranch().get(0)).getFunctionList().get(0).getName());
+                        } else {
+                            nestedComparision.setNext(ifBranch.getSuccessBranch().get(0).getName());
+                        }
                         comparisionList.add(nestedComparision);
                     } else {
                         SimpleComparision simpleComparision = (SimpleComparision) comparision;
-                        simpleComparision.setNext(ifBranch.getSuccessBranch().get(0).getName());
+                        if (ifBranch.getSuccessBranch().get(0) instanceof Sequence){
+                            simpleComparision.setNext(((Sequence) ifBranch.getSuccessBranch().get(0)).getFunctionList().get(0).getName());
+                        } else {
+                            simpleComparision.setNext(ifBranch.getSuccessBranch().get(0).getName());
+                        }
+                        //simpleComparision.setNext(ifBranch.getSuccessBranch().get(0).getName());
                         comparisionList.add(simpleComparision);
+                    }
+                    ArrayList<FunctionStep> successSteps = ifBranch.getSuccessBranch();
+                    for (FunctionStep successStep:successSteps){
+                        if (successStep instanceof Parallel){
+                            createParallelFunctions(stepList, (Parallel) successStep);
+                        } else if (successStep instanceof Sequence){ //TODO fix two same sequence //TODO fix first
+                            // name bug
+                            createSequenceFunctions(stepList, (Sequence) successStep);
+                        }
                     }
                 }
                 ChoiceStep choiceStep = new ChoiceStep();
                 choiceStep.setChoices(comparisionList);
-                choiceStep.setDef(((IfExpr) functionStep).getElseBranchBody().get(0).getName());
-                stepList.put(functionStep.getName(), choiceStep);
-            } else if (functionStep instanceof Parallel){
-                Parallel parallel = (Parallel) functionStep;
-                ParStep parStep = new ParStep();
-                parStep.setType("Parallel");
-                //parStep.setNext();
-                parStep.setEnd(true);//check
-                ArrayList<ParNestedBranch> branchList = parStep.getBranch();
-                for(Function function : parallel.getFunctionList()){
-                    ParNestedBranch nestedBranch = new ParNestedBranch();
-                    nestedBranch.setStartsAt(function.getName());
-
-                    SeqStep nestedStep = new SeqStep();
-                    nestedStep.setType("Task");
-                    nestedStep.setEnd(true);
-                    nestedStep.setResource("LambdaArn");
-                    nestedBranch.getStates().put(function.getName(),nestedStep);
-                    branchList.add(nestedBranch);
+                if (((IfExpr) functionStep).getElseBranchBody().get(0) instanceof Sequence){
+                    choiceStep.setDef(((Sequence) ((IfExpr) functionStep).getElseBranchBody().get(0)).getFunctionList().get(0).getName());
+                } else {
+                    choiceStep.setDef(((IfExpr) functionStep).getElseBranchBody().get(0).getName());
                 }
-                parStep.setBranch(branchList);
-                stepList.put(parallel.getName(),parStep);
+
+                ArrayList<FunctionStep> successSteps =  ((IfExpr) functionStep).getElseBranchBody();
+                for (FunctionStep successStep:successSteps){
+                    if (successStep instanceof Parallel){
+                        createParallelFunctions(stepList, (Parallel) successStep);
+                    } else if (successStep instanceof Sequence){ //TODO fix two same sequence //TODO fix first
+                        // name bug
+                        createSequenceFunctions(stepList, (Sequence) successStep);
+                    }
+                }
+                stepList.put(functionStep.getName(), choiceStep);
+            }
+            if (functionStep instanceof Parallel){
+                createParallelFunctions(stepList, (Parallel) functionStep);
             } else if (functionStep instanceof Sequence){ //TODO fix two same sequence //TODO fix first
                 // name bug
-                List<Function> sequenceFunctionList = ((Sequence) functionStep).getFunctionList();
-                for (int i=0;i<sequenceFunctionList.size();i++){
-                    Function function = sequenceFunctionList.get(i);
-                    SeqStep sequenceStep = new SeqStep();
-                    sequenceStep.setType("Task");
-                    if (i+1 != sequenceFunctionList.size()){
-                        sequenceStep.setNext(sequenceFunctionList.get(i+1).getName());
-                    } else {
-                        sequenceStep.setEnd(true);
-                    }
-                    stepList.put(function.getName(),sequenceStep);
-                }
+                createSequenceFunctions(stepList, (Sequence) functionStep);
             }
         }
 
@@ -238,6 +242,43 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         }
         System.out.println("----------------------------------------------");
         return step;
+    }
+
+    private void createParallelFunctions(Map<String, Object> stepList, Parallel functionStep) {
+        Parallel parallel = functionStep;
+        ParStep parStep = new ParStep();
+        parStep.setType("Parallel");
+        //parStep.setNext();
+        parStep.setEnd(true);//check
+        ArrayList<ParNestedBranch> branchList = parStep.getBranch();
+        for(Function function : parallel.getFunctionList()){
+            ParNestedBranch nestedBranch = new ParNestedBranch();
+            nestedBranch.setStartsAt(function.getName());
+
+            SeqStep nestedStep = new SeqStep();
+            nestedStep.setType("Task");
+            nestedStep.setEnd(true);
+            nestedStep.setResource("LambdaArn");
+            nestedBranch.getStates().put(function.getName(),nestedStep);
+            branchList.add(nestedBranch);
+        }
+        parStep.setBranch(branchList);
+        stepList.put(parallel.getName(),parStep);
+    }
+
+    private void createSequenceFunctions(Map<String, Object> stepList, Sequence functionStep) {
+        List<Function> sequenceFunctionList = functionStep.getFunctionList();
+        for (int i=0;i<sequenceFunctionList.size();i++){
+            Function function = sequenceFunctionList.get(i);
+            SeqStep sequenceStep = new SeqStep();
+            sequenceStep.setType("Task");
+            if (i+1 != sequenceFunctionList.size()){
+                sequenceStep.setNext(sequenceFunctionList.get(i+1).getName());
+            } else {
+                sequenceStep.setEnd(true);
+            }
+            stepList.put(function.getName(),sequenceStep);
+        }
     }
 
     public Comparision comparisionBuilder(Condition condition) {

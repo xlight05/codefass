@@ -1,3 +1,4 @@
+
 n = 9;
 
 function f1 = {
@@ -15,14 +16,12 @@ function f3 = {
     handler:"ewwwww"
 };
 
-sequence s1 = [f1 f2];
-sequence s2 = [f1 f3];
-sequence s3 = [f2 f3];
-        
-if (!("$.var"=="ew")) {
-    s1
-} else if ("$.var"!=25) {
-    s2
-} else {
-    s3
+orchestrate () {
+    if (!("$.var"=="ew")) {
+        sequence s1 = [f1 f2];
+    } else if ("$.var"!=25) {
+        sequence s2 = [f1 f3];
+    } else {
+        sequence s3 = [f2 f3];
+    }
 }
