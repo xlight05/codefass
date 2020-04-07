@@ -46,7 +46,6 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     @Override
     public Value visitOrchestrate_def(FassParser.Orchestrate_defContext ctx) {
-        System.out.println("In Orc");
         List<TerminalNode> paramList = ctx.param_block().ID();
         for (TerminalNode node : paramList) {
             node.getText();
@@ -56,8 +55,17 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         for (FassParser.Orchestrate_statContext stat : stats) {
             if (stat.if_stat() != null) {
                 this.visitIf_stat1(stat.if_stat());
+            } else if (stat.parallel_def() != null){
+                Parallel parallel = (Parallel) this.visitParallel_def1(stat.parallel_def()).value;
+                functionOrchestrator.getStepList().add(parallel);
+            } else if (stat.sequence_def() != null) {
+                Sequence sequence = (Sequence) this.visitSequence_def1(stat.sequence_def()).value;
+                functionOrchestrator.getStepList().add(sequence);
+            } else if (stat.start_import() != null) {
+                ArrayList<FunctionStep> importedList =
+                        imports.get(stat.start_import().ID().getText()).getStepList();
+                functionOrchestrator.getStepList().addAll(importedList);
             }
-            //TODO add others
         }
 
         try {
@@ -276,33 +284,6 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
         return value;
     }
 
-    // if override
-//    @Override
-//    public Compiler.Value visitIf_stat(FassParser.If_statContext ctx) {
-//        List<FassParser.Condition_blockContext> conditions =  ctx.condition_block();
-//
-//        boolean evaluatedBlock = false;
-//
-//        for(FassParser.Condition_blockContext condition : conditions) {
-//
-//            Compiler.Value evaluated = this.visit(condition.expr());
-//
-//            if(evaluated.asBoolean()) {
-//                evaluatedBlock = true;
-//                // evaluate this block whose expr==true
-//                this.visit(condition.stat_block());
-//                break;
-//            }
-//        }
-//
-//        if(!evaluatedBlock && ctx.stat_block() != null) {
-//            // evaluate the else-stat_block (if present == not null)
-//            this.visit(ctx.stat_block());
-//        }
-//
-//        return Compiler.Value.VOID;
-//    }
-
     //@Override
     public Value visitIf_stat1(FassParser.If_statContext ctx) {
         List<FassParser.Condition_blockContext> condition_block = ctx.condition_block();
@@ -397,7 +378,6 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     public Value visitSequence_def1(FassParser.Sequence_defContext ctx) {
         String id = ctx.ID().getText();
-        System.out.println("In seq "+id);
         List<FassParser.Sequence_statContext> sequenceElements =
                 ctx.sequence_block().sequence_repeat().sequence_stat();
         Sequence sequence = new Sequence(id);

@@ -1,143 +1,43 @@
 {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "An example template with an IAM role for a Lambda state machine.",
-  "Resources": {
-    "LambdaExecutionRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              },
-              "Action": "sts:AssumeRole"
-            }
-          ]
-        }
-      }
-    },
-    "function oneeee": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Handler": "ewww",
-        "Role": {
-          "Fn::GetAtt": [
-            "LambdaExecutionRole",
-            "Arn"
-          ]
-        },
-        "Code": {
-          "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From function oneeee!\");\n};\n"
-        },
-        "Runtime": "nodejs12.x",
-        "Timeout": "25"
-      }
-    },
-    "function twoo": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Handler": "ewww",
-        "Role": {
-          "Fn::GetAtt": [
-            "LambdaExecutionRole",
-            "Arn"
-          ]
-        },
-        "Code": {
-          "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From function twoo!\");\n};\n"
-        },
-        "Runtime": "nodejs12.x",
-        "Timeout": "25"
-      }
-    },
-    "function threee": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Handler": "ewwwww",
-        "Role": {
-          "Fn::GetAtt": [
-            "LambdaExecutionRole",
-            "Arn"
-          ]
-        },
-        "Code": {
-          "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From function threee!\");\n};\n"
-        },
-        "Runtime": "nodejs12.x",
-        "Timeout": "25"
-      }
-    },
-    "StatesExecutionRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  {
-                    "Fn::Sub": "states.${AWS::Region}.amazonaws.com"
-                  }
-                ]
-              },
-              "Action": "sts:AssumeRole"
-            }
-          ]
-        },
-        "Path": "/",
-        "Policies": [
-          {
-            "PolicyName": "StatesExecutionPolicy",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "lambda:InvokeFunction"
-                  ],
-                  "Resource": "*"
-                }
-              ]
+  "Comment": "Test Desc",
+  "StartAt": "p1",
+  "States": {
+    "p1": {
+      "Type": "Parallel",
+      "Resource": "lambdaArn",
+      "End": true,
+      "Branch": [
+        {
+          "StartAt": "function oneeee",
+          "States": {
+            "function oneeee": {
+              "Type": "Task",
+              "Resource": "LambdaArn",
+              "End": true
             }
           }
-        ]
-      }
-    },
-    "MyStateMachine": {
-      "Type": "AWS::StepFunctions::StateMachine",
-      "Properties": {
-        "DefinitionString": {
-          "Fn::Sub": [
-            "{\"Comment\":\"Test Desc\",\"StartAt\":\"ChoiceBlock\",\"States\":{\"ChoiceBlock\":{\"Type\":\"Choice\",\"Choices\":[{\"Not\":{\"Variable\":\"$.var\",\"StringEquals\":\"ew\"},\"Next\":\"s1\"},{\"Not\":{\"Variable\":\"$.var\",\"NumericEquals\":25.0},\"Next\":\"s2\"}],\"Default\":\"s3\"}}}",
-            {
-              "lambdaArn1": {
-                "Fn::GetAtt": [
-                  "FunctionOne",
-                  "Arn"
-                ]
-              },
-              "lambdaArn2": {
-                "Fn::GetAtt": [
-                  "FunctionTwo",
-                  "Arn"
-                ]
-              }
-            }
-          ]
         },
-        "RoleArn": {
-          "Fn::GetAtt": [
-            "StatesExecutionRole",
-            "Arn"
-          ]
+        {
+          "StartAt": "function twoo",
+          "States": {
+            "function twoo": {
+              "Type": "Task",
+              "Resource": "LambdaArn",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "function threee",
+          "States": {
+            "function threee": {
+              "Type": "Task",
+              "Resource": "LambdaArn",
+              "End": true
+            }
+          }
         }
-      }
+      ]
     }
   }
 }

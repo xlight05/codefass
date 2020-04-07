@@ -19,6 +19,8 @@ public class Sequence extends FunctionStep implements Serializable {
         this.functionList = functionList;
     }
 
+
+
     @Override
     public String toString() {
         return "Sequence{" +

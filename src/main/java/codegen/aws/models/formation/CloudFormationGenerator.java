@@ -24,6 +24,9 @@ import codegen.aws.models.formation.step.Comparision;
 import codegen.aws.models.formation.step.LambdaArn;
 import codegen.aws.models.formation.step.NestedComparision;
 import codegen.aws.models.formation.step.NumericComparision;
+import codegen.aws.models.formation.step.ParNestedBranch;
+import codegen.aws.models.formation.step.ParStep;
+import codegen.aws.models.formation.step.SeqStep;
 import codegen.aws.models.formation.step.SimpleComparision;
 import codegen.aws.models.formation.step.StateDefString;
 import codegen.aws.models.formation.step.StateMachine;
@@ -37,6 +40,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 public class CloudFormationGenerator extends CloudArtifactGenerator {
@@ -68,9 +72,9 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             IfExpr ifExpr = (IfExpr) step;
             List<IfBranch> ifBranches = ifExpr.getIfBranches();
             for (IfBranch ifBranch : ifBranches) {
-                functions.addAll(getFunctionsFromStep(ifBranch.getSuccessBranch()));
+                functions.addAll(getFunctionsFromStepList(ifBranch.getSuccessBranch()));
             }
-            functions.addAll(getFunctionsFromStep(ifExpr.getElseBranchBody())); //test logic
+            functions.addAll(getFunctionsFromStepList(ifExpr.getElseBranchBody())); //test logic
         }
         return functions;
     }
@@ -173,22 +177,66 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
                     Comparision comparision = comparisionBuilder(rootCondition);
                     if (comparision instanceof NestedComparision) {
                         NestedComparision nestedComparision = (NestedComparision) comparision;
-                        nestedComparision.setNext(ifBranch.getSuccessBranch().getName());
+                        nestedComparision.setNext(ifBranch.getSuccessBranch().get(0).getName());
                         comparisionList.add(nestedComparision);
                     } else {
                         SimpleComparision simpleComparision = (SimpleComparision) comparision;
-                        simpleComparision.setNext(ifBranch.getSuccessBranch().getName());
+                        simpleComparision.setNext(ifBranch.getSuccessBranch().get(0).getName());
                         comparisionList.add(simpleComparision);
                     }
                 }
                 ChoiceStep choiceStep = new ChoiceStep();
                 choiceStep.setChoices(comparisionList);
-                choiceStep.setDef(((IfExpr) functionStep).getElseBranchBody().getName());
+                choiceStep.setDef(((IfExpr) functionStep).getElseBranchBody().get(0).getName());
                 stepList.put(functionStep.getName(), choiceStep);
+            } else if (functionStep instanceof Parallel){
+                Parallel parallel = (Parallel) functionStep;
+                ParStep parStep = new ParStep();
+                parStep.setType("Parallel");
+                //parStep.setNext();
+                parStep.setEnd(true);//check
+                ArrayList<ParNestedBranch> branchList = parStep.getBranch();
+                for(Function function : parallel.getFunctionList()){
+                    ParNestedBranch nestedBranch = new ParNestedBranch();
+                    nestedBranch.setStartsAt(function.getName());
+
+                    SeqStep nestedStep = new SeqStep();
+                    nestedStep.setType("Task");
+                    nestedStep.setEnd(true);
+                    nestedStep.setResource("LambdaArn");
+                    nestedBranch.getStates().put(function.getName(),nestedStep);
+                    branchList.add(nestedBranch);
+                }
+                parStep.setBranch(branchList);
+                stepList.put(parallel.getName(),parStep);
+            } else if (functionStep instanceof Sequence){ //TODO fix two same sequence //TODO fix first
+                // name bug
+                List<Function> sequenceFunctionList = ((Sequence) functionStep).getFunctionList();
+                for (int i=0;i<sequenceFunctionList.size();i++){
+                    Function function = sequenceFunctionList.get(i);
+                    SeqStep sequenceStep = new SeqStep();
+                    sequenceStep.setType("Task");
+                    if (i+1 != sequenceFunctionList.size()){
+                        sequenceStep.setNext(sequenceFunctionList.get(i+1).getName());
+                    } else {
+                        sequenceStep.setEnd(true);
+                    }
+                    stepList.put(function.getName(),sequenceStep);
+                }
             }
         }
 
         step.setStates(stepList);
+        System.out.println("----------------------------------------------");
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        String cloudFormationJson = null;
+            cloudFormationJson = mapper.writeValueAsString(step);
+            System.out.println(cloudFormationJson);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        System.out.println("----------------------------------------------");
         return step;
     }
 

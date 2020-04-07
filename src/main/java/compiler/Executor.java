@@ -35,8 +35,8 @@ public class Executor {
 
     public FunctionOrchestrator compile() throws IOException {
 
-        //String args = "src/main/fass/andIf.fass";
-        String args = "test.fass";
+        String args = "src/main/fass/parallel.fass";
+        //String args = "test.fass";
         System.out.println("parsing: " + args);
 
         FassLexer lexer = new FassLexer(new ANTLRFileStream(args));
