@@ -46,10 +46,11 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     @Override
     public Value visitOrchestrate_def(FassParser.Orchestrate_defContext ctx) {
-        List<TerminalNode> paramList = ctx.param_block().ID();
+        List<TerminalNode> paramList = ctx.param_block().PARAM();
         for (TerminalNode node : paramList) {
-            node.getText();
-            //TODO Fix params logic
+            String id = node.getText();
+            Value value = new Value(node.getText());
+            memory.put(id, value);
         }
         List<FassParser.Orchestrate_statContext> stats = ctx.orchestrate_block().orc_block().orchestrate_stat();
         for (FassParser.Orchestrate_statContext stat : stats) {
@@ -126,6 +127,16 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     @Override
     public Value visitIdAtom(FassParser.IdAtomContext ctx) {
+        String id = ctx.getText();
+        Value value = memory.get(id);
+        if (value == null) {
+            throw new RuntimeException("no such variable: " + id);
+        }
+        return value;
+    }
+
+    @Override
+    public Value visitParamAtom(FassParser.ParamAtomContext ctx) {
         String id = ctx.getText();
         Value value = memory.get(id);
         if (value == null) {

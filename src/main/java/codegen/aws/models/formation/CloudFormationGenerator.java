@@ -289,10 +289,10 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             String variable = "";
             SimpleComparision comparision = assignEvaulator(left, condition);
             if (comparision == null) {
-                variable = (String) left;
+                variable = ((String) left).replace("$","$.");
                 comparision = assignEvaulator(right, condition);
             } else {
-                variable = (String) right;
+                variable = ((String) right).replace("$","$.");
             }
             comparision.setVariable(variable);
 
@@ -351,7 +351,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
     public SimpleComparision assignEvaulator(Object left, Condition condition) {
         if (left instanceof String) {
             String leftStr = (String) left;
-            if (((String) left).startsWith("$.")) {
+            if (((String) left).startsWith("$")) {
                 return null;
             } else {
                 StringComparision stringComparision = new StringComparision();

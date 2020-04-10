@@ -1,7 +1,5 @@
 package codegen;
 
-import sun.plugin.javascript.navig.Array;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 

@@ -32,7 +32,7 @@ orchestrate_stat
 ;
 
 param_block
- : OPAR (ID COMMA?)* CPAR
+ : OPAR (PARAM COMMA?)* CPAR
  ;
 
 sequence_def
@@ -164,6 +164,7 @@ atom
  | ID             #idAtom
  | STRING         #stringAtom
  | NIL            #nilAtom
+ | PARAM          #paramAtom
  ;
 
 OR : '||';
@@ -209,7 +210,7 @@ ID
  ;
 
 PARAM
-: [a-zA-Z_] [a-zA-Z_0-9]*
+: '$' [a-zA-Z_][a-zA-Z_0-9]*
 ;
 
 INT
