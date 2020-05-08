@@ -3,11 +3,11 @@
 ## Function Representation
 
 Used to represent a function in the definition file. The design is similar to an object in javascript.
-```javascript
+```
 function f1 = {
     name:"comp1",
     handler:"comp1/app.js",
-    language:”nodejs”,
+    language:"nodejs",
 };
 ```
 
@@ -17,59 +17,59 @@ function f1 = {
 
 Orchestrator is the code block that defines the execution of the function. The scope defines the runtime code block if the application. The orchestrator has a parameter block and a code block. Parameter block could contain zero or multiple parameter variables. Parameter variable is a special variable that is used to define an incoming request data field in the code in a cleaner way. These variables can be used in the scope to change the execution of the functions. Orchestrator code block could contain one or more imported orchestration construct, Sequence construct, Parallel construct or If construct.
 
-    orchestrate ($type) {
-	    //orchestration flow goes here
-    }
-
+```
+orchestrate ($type) {
+    //orchestration flow goes here
+}
+```
   
 
 ## Sequence Representation
 Sequence construct defines sequence execution of multiple functions. The design is similar to an array in c like programming languages.
 
-
-    orchestrate ($type) {
-	    sequence s1 = [f1 f2];
-    }
-
+```
+orchestrate ($type) {
+    sequence s1 = [f1 f2];
+}
+```
   
 
 ## Parallel Representation
 
 Parallel construct defines parallel execution of multiple functions. The design is similar to an array in c like programming languages.
 
-Code -
-
-    orchestrate ($type) {
-	    parallel s1 = [f1 f2];
-    }
-
+```
+orchestrate ($type) {
+    parallel s1 = [f1 f2];
+}
+```
 ## Choice Representation
 
 Represented by If keyword. If construct defines a choice of execution depending on a certain given condition. The design is identical to If statements in c based languages.However the condition evaluation logic is different and done according to the cloud provider.
-
-    orchestrate ($type) {
-	    if (!($type=="push")) {
-		    sequence s1 = [f1 f2];
-	    } else if ($type==”pull”) {
-		    sequence s2 = [f1 f3];
-	    } else {
-		    sequence s3 = [f2 f3];
-	    }
+```
+orchestrate ($type) {
+    if (!($type=="push")) {
+        sequence s1 = [f1 f2];
+    } else if ($type==”pull”) {
+        sequence s2 = [f1 f3];
+    } else {
+        sequence s3 = [f2 f3];
     }
-
+}
+```
   
 
 ## Import Representation
 
 Import construct allows developers to make use of another FaaS module’s resources and orchestrators.
 
+```
+import comp1;
 
-    import comp1;
-    
-    orchestrate () {
-	    start comp1;
-    }
-
+orchestrate () {
+    start comp1;
+}
+```
 # Connectors
 
 Connectors are extended modules of the language core that transforms the vendor neutral function orchestrations to vendor specific code. The language core is completely decoupled from the connectors. Each cloud has prefered way of function coordination and each connector is designed to transform the vendor neutral code into vendor specific native code with the best practices.
