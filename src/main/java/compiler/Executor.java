@@ -44,8 +44,7 @@ public class Executor {
         ParseTree tree = parser.parse();
         EvalVisitor visitor = new EvalVisitor();
         visitor.visit(tree);
-        FunctionOrchestrator functionOrchestrator = visitor.functionOrchestrator;
-//        try {
+        //        try {
 //            Files.createDirectories(Paths.get("build"));
 //            FileOutputStream f = new FileOutputStream(new File("build/object.txt"));
 //            ObjectOutputStream o = new ObjectOutputStream(f);
@@ -55,6 +54,6 @@ public class Executor {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        return functionOrchestrator;
+        return visitor.functionOrchestrator;
     }
 }

@@ -11,6 +11,7 @@ import codegen.Parallel;
 import codegen.Sequence;
 import codegen.aws.models.formation.CloudFormationGenerator;
 import compiler.Executor;
+import org.apache.commons.lang3.time.StopWatch;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -22,13 +23,17 @@ public class FassBuildAws implements Runnable {
 
     public void run() {
         System.out.println("Building AWS shit");
-
+        StopWatch stopwatch = new StopWatch();
+        stopwatch.start();
         Executor compiler = new Executor();
         try {
             FunctionOrchestrator liveFlow = compiler.compile();
             System.out.println(liveFlow);
             CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
             awsGen.build();
+            stopwatch.stop();
+            long timeTaken = stopwatch.getTime();
+            System.out.println("Time took "+timeTaken);
         } catch (IOException e) {
             e.printStackTrace();
         }

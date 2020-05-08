@@ -1,6 +1,4 @@
 
-n = 9;
-
 function f1 = {
     name:"function oneeee"
     handler:"ewww"
