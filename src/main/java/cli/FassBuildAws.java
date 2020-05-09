@@ -12,9 +12,13 @@ import codegen.Sequence;
 import codegen.aws.models.formation.CloudFormationGenerator;
 import compiler.Executor;
 import org.apache.commons.lang3.time.StopWatch;
+import org.codehaus.plexus.util.FileUtils;
 import picocli.CommandLine;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,27 +26,45 @@ import java.util.List;
 public class FassBuildAws implements Runnable {
 
     public void run() {
-        System.out.println("Building AWS shit");
-        StopWatch stopwatch = new StopWatch();
-        stopwatch.start();
-        Executor compiler = new Executor();
+        final File tmp = new File("");
+        final File folder = new File(tmp.getAbsolutePath());
+        String defFilePath = tmp.getAbsolutePath()+File.separator+listFilesForFolder(folder);
+        System.out.println("Compiling: "+ defFilePath);
+
+        String source = "/home/xlight/tmp-art/aws/";
+        File srcDir = new File(source);
+
+        String destination = "output/aws";
+        File destDir = new File(destination);
+        System.out.println("Compilation complete");
         try {
-            FunctionOrchestrator liveFlow = compiler.compile();
-            System.out.println(liveFlow);
-            CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
-            awsGen.build();
-            stopwatch.stop();
-            long timeTaken = stopwatch.getTime();
-            System.out.println("Time took "+timeTaken);
+            FileUtils.copyDirectory(srcDir, destDir);
+            System.out.println("AWS Artifacts generated: "+folder+"/output/aws");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        FunctionOrchestrator testWorkflow = testChoiceFlow();
-//        //FunctionOrchestrator testWorkflow = testComplexChoiceFlow();
-//        //System.out.println(testWorkflow);
-//        CloudArtifactGenerator awsGen = new CloudFormationGenerator(testWorkflow);
-//        awsGen.build();
 
+//        Executor compiler = new Executor();
+//        try {
+//            FunctionOrchestrator liveFlow = compiler.compile(defFilePath);
+//            System.out.println(liveFlow);
+//            CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
+//            awsGen.build();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+    }
+
+    public static String listFilesForFolder(File folder) {
+        for (final File fileEntry : folder.listFiles()) {
+            if (!fileEntry.isDirectory()) {
+                if (fileEntry.getName().endsWith(".fass")){
+                    return fileEntry.getName();
+                }
+            }
+        }
+        return null;
     }
 
     public static FunctionOrchestrator testSequencialFlow () {

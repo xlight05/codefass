@@ -33,9 +33,9 @@ public class Executor {
 //        Double d = EvalVisitor.SMALL_VALUE;
 //    }
 
-    public FunctionOrchestrator compile() throws IOException {
+    public FunctionOrchestrator compile(String args) throws IOException {
 
-        String args = "src/main/fass/andIf.fass";
+        //String args = "src/main/fass/andIf.fass";
         //String args = "test.fass";
         System.out.println("parsing: " + args);
 
@@ -56,4 +56,6 @@ public class Executor {
 //        }
         return visitor.functionOrchestrator;
     }
+
+
 }

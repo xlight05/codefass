@@ -33,11 +33,20 @@ import codegen.aws.models.formation.step.StateMachine;
 import codegen.aws.models.formation.step.StateProperties;
 import codegen.aws.models.formation.step.Step;
 import codegen.aws.models.formation.step.StringComparision;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -81,6 +90,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
 
     public void build() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         IAMRole iamRole = generateLambdaIAM();
@@ -106,7 +116,13 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         try {
             String cloudFormationJson = mapper.writeValueAsString(cloudFormation);
             System.out.println(cloudFormationJson);
+            List<String> lines = Arrays.asList(cloudFormationJson);
+            Path file = Paths.get("output.json");
+            Files.write(file, lines, StandardCharsets.UTF_8);
+
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -233,7 +249,8 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         step.setStates(stepList);
         System.out.println("----------------------------------------------");
         try {
-        ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         String cloudFormationJson = null;
             cloudFormationJson = mapper.writeValueAsString(step);
             System.out.println(cloudFormationJson);
@@ -516,6 +533,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
+            mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
             String stepString = mapper.writeValueAsString(step);
 
             sub.add(stepString);

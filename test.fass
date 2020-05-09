@@ -1,23 +1,19 @@
-
 function f1 = {
     name:"function oneeee"
     handler:"ewww"
 };
-
 function f2 = {
     name:"function twoo"
     handler:"ewww"
 };
-
 function f3 = {
     name:"function threee"
     handler:"ewwwww"
 };
-
-orchestrate () {
-    if (!("$.var"=="ew")) {
+orchestrate ($type) {
+    if (!($type=="ew")) {
         sequence s1 = [f1 f2];
-    } else if ("$.var"!=25) {
+    } else if ($type!=25) {
         sequence s2 = [f1 f3];
     } else {
         sequence s3 = [f2 f3];
