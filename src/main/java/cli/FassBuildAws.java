@@ -31,29 +31,15 @@ public class FassBuildAws implements Runnable {
         String defFilePath = tmp.getAbsolutePath()+File.separator+listFilesForFolder(folder);
         System.out.println("Compiling: "+ defFilePath);
 
-        String source = "/home/xlight/tmp-art/aws/";
-        File srcDir = new File(source);
-
-        String destination = "output/aws";
-        File destDir = new File(destination);
-        System.out.println("Compilation complete");
+        Executor compiler = new Executor();
         try {
-            FileUtils.copyDirectory(srcDir, destDir);
-            System.out.println("AWS Artifacts generated: "+folder+"/output/aws");
-
+            FunctionOrchestrator liveFlow = compiler.compile(defFilePath);
+            System.out.println(liveFlow);
+            CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
+            awsGen.build();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-//        Executor compiler = new Executor();
-//        try {
-//            FunctionOrchestrator liveFlow = compiler.compile(defFilePath);
-//            System.out.println(liveFlow);
-//            CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
-//            awsGen.build();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public static String listFilesForFolder(File folder) {

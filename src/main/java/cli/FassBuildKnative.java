@@ -1,5 +1,9 @@
 package cli;
 
+import codegen.CloudArtifactGenerator;
+import codegen.FunctionOrchestrator;
+import codegen.aws.models.formation.CloudFormationGenerator;
+import compiler.Executor;
 import org.codehaus.plexus.util.FileUtils;
 import picocli.CommandLine;
 
@@ -16,16 +20,12 @@ public class FassBuildKnative implements Runnable{
         String defFilePath = tmp.getAbsolutePath()+File.separator+listFilesForFolder(folder);
         System.out.println("Compiling: "+ defFilePath);
 
-        String source = "/home/xlight/tmp-art/knative/";
-        File srcDir = new File(source);
-
-        String destination = "output/knative";
-        File destDir = new File(destination);
-        System.out.println("Compilation complete");
-
+        Executor compiler = new Executor();
         try {
-            FileUtils.copyDirectory(srcDir, destDir);
-            System.out.println("Knative Artifacts generated: "+folder+"/output/knative");
+            FunctionOrchestrator liveFlow = compiler.compile(defFilePath);
+            System.out.println(liveFlow);
+            CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
+            awsGen.build();
         } catch (IOException e) {
             e.printStackTrace();
         }
