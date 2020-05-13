@@ -41,7 +41,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,8 +49,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class CloudFormationGenerator extends CloudArtifactGenerator {
 
@@ -291,7 +290,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             SeqStep nestedStep = new SeqStep();
             nestedStep.setType("Task");
             nestedStep.setEnd(true);
-            nestedStep.setResource("LambdaArn");
+            nestedStep.setResource("${"+function.getName()+"Arn}");
             nestedBranch.getStates().put(function.getName(),nestedStep);
             branchList.add(nestedBranch);
         }
@@ -305,6 +304,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             Function function = sequenceFunctionList.get(i);
             SeqStep sequenceStep = new SeqStep();
             sequenceStep.setType("Task");
+            sequenceStep.setResource("${"+function.getName()+"Arn}");
             if (i+1 != sequenceFunctionList.size()){
                 sequenceStep.setNext(sequenceFunctionList.get(i+1).getName());
             } else {
@@ -528,10 +528,9 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             attributes.add("Arn");
             LambdaRole lambdaRole = new LambdaRole(attributes);
 
-            LambdaCode lambdaCode = new LambdaCode("exports.handler = (event, context, callback) => {\n    " +
-                    "callback(null, \"Hello From " + function.getName() + "!\");\n};\n");
-            LambdaProperty lambdaProperty = new LambdaProperty(function.getHandler(), lambdaRole, lambdaCode,
-                    function.getLanguage(), "25");
+            LambdaCode lambdaCode = new LambdaCode(readFileContents(function.getHandler()));
+            LambdaProperty lambdaProperty = new LambdaProperty("index.handler", lambdaRole, lambdaCode,
+                    getLanguageRuntime(function.getLanguage()), "25");
 
             Lambda lambda = new Lambda();
             lambda.setProperties(lambdaProperty);
@@ -539,6 +538,34 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         }
         return lamdas;
     }
+
+    private static String readFileContents(String filePath)
+    {
+        StringBuilder contentBuilder = new StringBuilder();
+        try (Stream<String> stream = Files.lines( Paths.get(filePath), StandardCharsets.UTF_8))
+        {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return contentBuilder.toString();
+    }
+
+    private String getLanguageRuntime (String language) {
+        switch (language){
+            case "nodejs":
+                return "nodejs12.x";
+            case "java":
+                return "java8";
+            case "python":
+                return "Python 3.8";
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
 
     public StateMachine generateStateMachine() {
         StateMachine stateMachine = new StateMachine();
@@ -555,15 +582,12 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             sub.add(stepString);
             Map<String, LambdaArn> lambdaMap = new LinkedHashMap<>();
 
-            LambdaArn lambdaArn = new LambdaArn();
-            lambdaArn.getAttr().add("FunctionOne");
-            lambdaArn.getAttr().add("Arn");
-            lambdaMap.put("lambdaArn1",lambdaArn);
-
-            LambdaArn lambda2Arn = new LambdaArn();
-            lambda2Arn.getAttr().add("FunctionTwo");
-            lambda2Arn.getAttr().add("Arn");
-            lambdaMap.put("lambdaArn2",lambda2Arn);
+            for (Function function:functionList){
+                LambdaArn lambdaArn = new LambdaArn();
+                lambdaArn.getAttr().add(function.getName());
+                lambdaArn.getAttr().add("Arn");
+                lambdaMap.put(function.getName()+"Arn",lambdaArn);
+            }
 
             sub.add(lambdaMap);
 

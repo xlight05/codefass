@@ -1,0 +1,53 @@
+{
+  "Comment": "Auto generated serverless workflow from FaaS",
+  "StartAt": "ChoiceState",
+  "States": {
+    "ChoiceState": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.type",
+          "StringEquals": "seq",
+          "Next": "sequenceOne"
+        }
+      ],
+      "Default": "par"
+    },
+    "sequenceOne": {
+      "Type": "Task",
+      "Resource": "${lambdaArn1}",
+      "Next": "sequenceTwo"
+    },
+    "sequenceTwo": {
+      "Type": "Task",
+      "Resource": "${lambdaArn2}",
+      "End": true
+    },
+    "par": {
+      "Type": "Parallel",
+      "End": true,
+      "Branches": [
+        {
+          "StartAt": "parallelOne",
+          "States": {
+            "parallelOne": {
+              "Type": "Task",
+              "Resource": "${lambdaArn3}",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "parallelTwo",
+          "States": {
+            "parallelTwo": {
+              "Type": "Task",
+              "Resource": "${lambdaArn4}",
+              "End": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

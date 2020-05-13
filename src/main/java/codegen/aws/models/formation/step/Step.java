@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Step {
     @JsonProperty("Comment")
-    private String comment = "Test Comment";
+    private String comment = "Auto generated serverless workflow from FaaS";
     @JsonProperty("StartAt")
     private String startsAt = "ChoiceStateX";
     @JsonProperty("States")

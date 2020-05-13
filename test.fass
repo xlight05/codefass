@@ -1,21 +1,29 @@
-function f1 = {
-    name:"function oneeee"
-    handler:"ewww"
+function seq1 = {
+    name:"sequenceOne"
+    handler:"seq1/app.js"
+    language: "nodejs"
 };
-function f2 = {
-    name:"function twoo"
-    handler:"ewww"
+function seq2 = {
+    name:"sequenceTwo"
+    handler:"seq2/app.js"
+    language: "nodejs"
 };
-function f3 = {
-    name:"function threee"
-    handler:"ewwwww"
+
+function par1 = {
+    name:"parallelOne"
+    handler:"par1/app.js"
+    language: "nodejs"
 };
+function par2 = {
+    name:"parallelTwo"
+    handler:"par2/app.js"
+    language: "nodejs"
+};
+
 orchestrate ($type) {
-    if (!($type=="ew")) {
-        sequence s1 = [f1 f2];
-    } else if ($type!=25) {
-        sequence s2 = [f1 f3];
+    if ($type=="seq") {
+        sequence seq = [seq1 seq2];
     } else {
-        sequence s3 = [f2 f3];
+        parallel par = [par1 par2];
     }
 }

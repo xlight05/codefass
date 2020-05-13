@@ -1,0 +1,171 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "An example template with an IAM role for a Lambda state machine.",
+    "Resources": {
+      "LambdaExecutionRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "lambda.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          }
+        }
+      },
+      "sequenceOne": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Handler": "index.handler",
+          "Role": {
+            "Fn::GetAtt": [
+              "LambdaExecutionRole",
+              "Arn"
+            ]
+          },
+          "Code": {
+            "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Sequence One!\");\n};\n"
+          },
+          "Runtime": "nodejs12.x",
+          "Timeout": "25"
+        }
+      },
+      "sequenceTwo": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Handler": "index.handler",
+          "Role": {
+            "Fn::GetAtt": [
+              "LambdaExecutionRole",
+              "Arn"
+            ]
+          },
+          "Code": {
+            "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Sequence Two!\");\n};\n"
+          },
+          "Runtime": "nodejs12.x",
+          "Timeout": "25"
+        }
+      },
+      "parallelOne": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Handler": "index.handler",
+          "Role": {
+            "Fn::GetAtt": [
+              "LambdaExecutionRole",
+              "Arn"
+            ]
+          },
+          "Code": {
+            "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Parallel One!\");\n};\n"
+          },
+          "Runtime": "nodejs12.x",
+          "Timeout": "25"
+        }
+      },
+      "parallelTwo": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+          "Handler": "index.handler",
+          "Role": {
+            "Fn::GetAtt": [
+              "LambdaExecutionRole",
+              "Arn"
+            ]
+          },
+          "Code": {
+            "ZipFile": "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Parallel Two!\");\n};\n"
+          },
+          "Runtime": "nodejs12.x",
+          "Timeout": "25"
+        }
+      },
+      "StatesExecutionRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    {
+                      "Fn::Sub": "states.${AWS::Region}.amazonaws.com"
+                    }
+                  ]
+                },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          },
+          "Path": "/",
+          "Policies": [
+            {
+              "PolicyName": "StatesExecutionPolicy",
+              "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "lambda:InvokeFunction"
+                    ],
+                    "Resource": "*"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "MyStateMachine": {
+        "Type": "AWS::StepFunctions::StateMachine",
+        "Properties": {
+          "DefinitionString": {
+            "Fn::Sub": [
+              "{\n    \"Comment\": \"Auto generated serverless workflow from FaaS\",\n    \"StartAt\": \"ChoiceState\",\n    \"States\": {\n        \"ChoiceState\": {\n            \"Type\": \"Choice\",\n            \"Choices\": [\n                {\n                    \"Variable\": \"$.type\",\n                    \"StringEquals\": \"seq\",\n                    \"Next\": \"sequenceOne\"\n                }\n            ],\n            \"Default\": \"par\"\n        },\n        \"sequenceOne\": {\n            \"Type\": \"Task\",\n            \"Resource\": \"${lambdaArn1}\",\n            \"Next\": \"sequenceTwo\"\n        },\n        \"sequenceTwo\": {\n            \"Type\": \"Task\",\n            \"Resource\": \"${lambdaArn2}\",\n            \"End\": true\n        },\n        \"par\": {\n            \"Type\": \"Parallel\",\n            \"End\": true,\n            \"Branches\": [\n              {\n               \"StartAt\": \"parallelOne\",\n               \"States\": {\n                \"parallelOne\": {\n                    \"Type\": \"Task\",\n                    \"Resource\": \"${lambdaArn3}\",\n                    \"End\": true\n                }\n               }\n             },\n             {\n               \"StartAt\": \"parallelTwo\",\n               \"States\": {\n                \"parallelTwo\": {\n                    \"Type\": \"Task\",\n                    \"Resource\": \"${lambdaArn4}\",\n                    \"End\": true\n                }\n               }\n             }\n            ]\n          }\n    }\n}",              {
+                "lambdaArn1": {
+                  "Fn::GetAtt": [
+                    "sequenceOne",
+                    "Arn"
+                  ]
+                },
+                "lambdaArn2": {
+                  "Fn::GetAtt": [
+                    "sequenceTwo",
+                    "Arn"
+                  ]
+                },
+                "lambdaArn3": {
+                  "Fn::GetAtt": [
+                    "parallelOne",
+                    "Arn"
+                  ]
+                },
+                "lambdaArn4": {
+                  "Fn::GetAtt": [
+                    "parallelTwo",
+                    "Arn"
+                  ]
+                }
+              }
+            ]
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "StatesExecutionRole",
+              "Arn"
+            ]
+          }
+        }
+      }
+    }
+  }

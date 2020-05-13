@@ -17,7 +17,7 @@ public class ParStep {
     @JsonProperty("End")
     private Boolean end = null;
 
-    @JsonProperty("Branch")
+    @JsonProperty("Branches")
     private ArrayList<ParNestedBranch> branch = new ArrayList<>();
 
     public String getType() {

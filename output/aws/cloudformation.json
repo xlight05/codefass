@@ -17,43 +17,57 @@
         }
       }
     },
-    "function oneeee" : {
+    "sequenceOne" : {
       "Type" : "AWS::Lambda::Function",
       "Properties" : {
-        "Handler" : "ewww",
+        "Handler" : "index.handler",
         "Role" : {
           "Fn::GetAtt" : [ "LambdaExecutionRole", "Arn" ]
         },
         "Code" : {
-          "ZipFile" : "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From function oneeee!\");\n};\n"
+          "ZipFile" : "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Sequence One!\");\n};\n"
         },
         "Runtime" : "nodejs12.x",
         "Timeout" : "25"
       }
     },
-    "function twoo" : {
+    "sequenceTwo" : {
       "Type" : "AWS::Lambda::Function",
       "Properties" : {
-        "Handler" : "ewww",
+        "Handler" : "index.handler",
         "Role" : {
           "Fn::GetAtt" : [ "LambdaExecutionRole", "Arn" ]
         },
         "Code" : {
-          "ZipFile" : "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From function twoo!\");\n};\n"
+          "ZipFile" : "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Sequence Two!\");\n};\n"
         },
         "Runtime" : "nodejs12.x",
         "Timeout" : "25"
       }
     },
-    "function threee" : {
+    "parallelOne" : {
       "Type" : "AWS::Lambda::Function",
       "Properties" : {
-        "Handler" : "ewwwww",
+        "Handler" : "index.handler",
         "Role" : {
           "Fn::GetAtt" : [ "LambdaExecutionRole", "Arn" ]
         },
         "Code" : {
-          "ZipFile" : "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From function threee!\");\n};\n"
+          "ZipFile" : "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Parallel One!\");\n};\n"
+        },
+        "Runtime" : "nodejs12.x",
+        "Timeout" : "25"
+      }
+    },
+    "parallelTwo" : {
+      "Type" : "AWS::Lambda::Function",
+      "Properties" : {
+        "Handler" : "index.handler",
+        "Role" : {
+          "Fn::GetAtt" : [ "LambdaExecutionRole", "Arn" ]
+        },
+        "Code" : {
+          "ZipFile" : "exports.handler = (event, context, callback) => {\n    callback(null, \"Hello From Parallel Two!\");\n};\n"
         },
         "Runtime" : "nodejs12.x",
         "Timeout" : "25"
@@ -92,12 +106,18 @@
       "Type" : "AWS::StepFunctions::StateMachine",
       "Properties" : {
         "DefinitionString" : {
-          "Fn::Sub" : [ "{\"Comment\":\"Test Desc\",\"StartAt\":\"ChoiceBlock\",\"States\":{\"function oneeee\":{\"Type\":\"Task\",\"Resource\":\"lambdaArn\",\"Next\":\"function threee\"},\"function twoo\":{\"Type\":\"Task\",\"Resource\":\"lambdaArn\",\"Next\":\"function threee\"},\"function threee\":{\"Type\":\"Task\",\"Resource\":\"lambdaArn\",\"End\":true},\"ChoiceBlock\":{\"Type\":\"Choice\",\"Choices\":[{\"Not\":{\"Variable\":\"$.type\",\"StringEquals\":\"ew\"},\"Next\":\"function oneeee\"},{\"Not\":{\"Variable\":\"$.type\",\"NumericEquals\":25.0},\"Next\":\"function oneeee\"}],\"Default\":\"function twoo\"}}}", {
-            "lambdaArn1" : {
-              "Fn::GetAtt" : [ "FunctionOne", "Arn" ]
+          "Fn::Sub" : [ "{\"Comment\":\"Test Desc\",\"StartAt\":\"ChoiceBlock\",\"States\":{\"sequenceOne\":{\"Type\":\"Task\",\"Resource\":\"${sequenceOneArn}\",\"Next\":\"sequenceTwo\"},\"sequenceTwo\":{\"Type\":\"Task\",\"Resource\":\"${sequenceTwoArn}\",\"End\":true},\"par\":{\"Type\":\"Parallel\",\"End\":true,\"Branches\":[{\"StartAt\":\"parallelOne\",\"States\":{\"parallelOne\":{\"Type\":\"Task\",\"Resource\":\"${parallelOneArn}\",\"End\":true}}},{\"StartAt\":\"parallelTwo\",\"States\":{\"parallelTwo\":{\"Type\":\"Task\",\"Resource\":\"${parallelTwoArn}\",\"End\":true}}}]},\"ChoiceBlock\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.type\",\"Next\":\"sequenceOne\",\"StringEquals\":\"seq\"}],\"Default\":\"par\"}}}", {
+            "sequenceOneArn" : {
+              "Fn::GetAtt" : [ "sequenceOne", "Arn" ]
             },
-            "lambdaArn2" : {
-              "Fn::GetAtt" : [ "FunctionTwo", "Arn" ]
+            "sequenceTwoArn" : {
+              "Fn::GetAtt" : [ "sequenceTwo", "Arn" ]
+            },
+            "parallelOneArn" : {
+              "Fn::GetAtt" : [ "parallelOne", "Arn" ]
+            },
+            "parallelTwoArn" : {
+              "Fn::GetAtt" : [ "parallelTwo", "Arn" ]
             }
           } ]
         },

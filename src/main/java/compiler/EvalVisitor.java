@@ -41,7 +41,11 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
     public EvalVisitor() {
         super();
-        functionOrchestrator = new FunctionOrchestrator("Test Name", "Test Desc", "1.0.0");
+        functionOrchestrator = new FunctionOrchestrator("FaaS deployment", "Auto generated serverless " +
+                "workflow " +
+                "from " +
+                "FaaS"
+                , "1.0.0");
     }
 
     @Override
@@ -374,6 +378,7 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
 
         String name = "";
         String handler = "";
+        String language ="";
         //TODO check
         for (FassParser.Function_statContext function : functionContents) {
             if (function.function_name() != null) {
@@ -381,8 +386,11 @@ public class EvalVisitor extends FassBaseVisitor<Value> {
             } else if (function.function_handler() != null) {
                 handler = function.function_handler().STRING().getText().replace("\"", "");
             }
+            else if (function.function_language() != null) {
+                language = function.function_language().STRING().getText().replace("\"", "");
+            }
         }
-        Function func = new Function(name, handler, "nodejs12.x", "index.js");
+        Function func = new Function(name, handler, language, "index.js");
         memory.put(id, new Value(func));
         return super.visitFunction_def(ctx);
     }
