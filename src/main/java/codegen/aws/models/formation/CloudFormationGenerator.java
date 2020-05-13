@@ -39,6 +39,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -117,15 +118,30 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
             String cloudFormationJson = mapper.writeValueAsString(cloudFormation);
             System.out.println(cloudFormationJson);
             List<String> lines = Arrays.asList(cloudFormationJson);
-            Path file = Paths.get("output.json");
+
+            File directory = new File("output");
+            if (! directory.exists()){
+                directory.mkdir();
+                // If you require it to make the entire directory path including parents,
+                // use directory.mkdirs(); here instead.
+            }
+
+            File directory1 = new File("output/aws");
+            if (! directory1.exists()){
+                directory1.mkdir();
+                // If you require it to make the entire directory path including parents,
+                // use directory.mkdirs(); here instead.
+            }
+
+
+            Path file = Paths.get("output/aws/cloudformation.json");
             Files.write(file, lines, StandardCharsets.UTF_8);
 
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
 //    public void build() {
 //        ObjectMapper mapper = new ObjectMapper();

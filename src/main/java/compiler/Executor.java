@@ -35,10 +35,6 @@ public class Executor {
 
     public FunctionOrchestrator compile(String args) throws IOException {
 
-        //String args = "src/main/fass/andIf.fass";
-        //String args = "test.fass";
-        System.out.println("parsing: " + args);
-
         FassLexer lexer = new FassLexer(new ANTLRFileStream(args));
         FassParser parser = new FassParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.parse();
