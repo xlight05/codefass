@@ -106,7 +106,7 @@
       "Type" : "AWS::StepFunctions::StateMachine",
       "Properties" : {
         "DefinitionString" : {
-          "Fn::Sub" : [ "{\"Comment\":\"Test Desc\",\"StartAt\":\"ChoiceBlock\",\"States\":{\"sequenceOne\":{\"Type\":\"Task\",\"Resource\":\"${sequenceOneArn}\",\"Next\":\"sequenceTwo\"},\"sequenceTwo\":{\"Type\":\"Task\",\"Resource\":\"${sequenceTwoArn}\",\"End\":true},\"par\":{\"Type\":\"Parallel\",\"End\":true,\"Branches\":[{\"StartAt\":\"parallelOne\",\"States\":{\"parallelOne\":{\"Type\":\"Task\",\"Resource\":\"${parallelOneArn}\",\"End\":true}}},{\"StartAt\":\"parallelTwo\",\"States\":{\"parallelTwo\":{\"Type\":\"Task\",\"Resource\":\"${parallelTwoArn}\",\"End\":true}}}]},\"ChoiceBlock\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.type\",\"Next\":\"sequenceOne\",\"StringEquals\":\"seq\"}],\"Default\":\"par\"}}}", {
+          "Fn::Sub" : [ "{\"Comment\":\"Auto generated serverless workflow from FaaS\",\"StartAt\":\"ChoiceBlock\",\"States\":{\"sequenceOne\":{\"Type\":\"Task\",\"Resource\":\"${sequenceOneArn}\",\"Next\":\"sequenceTwo\"},\"sequenceTwo\":{\"Type\":\"Task\",\"Resource\":\"${sequenceTwoArn}\",\"End\":true},\"par\":{\"Type\":\"Parallel\",\"End\":true,\"Branches\":[{\"StartAt\":\"parallelOne\",\"States\":{\"parallelOne\":{\"Type\":\"Task\",\"Resource\":\"${parallelOneArn}\",\"End\":true}}},{\"StartAt\":\"parallelTwo\",\"States\":{\"parallelTwo\":{\"Type\":\"Task\",\"Resource\":\"${parallelTwoArn}\",\"End\":true}}}]},\"ChoiceBlock\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.type\",\"Next\":\"sequenceOne\",\"StringEquals\":\"seq\"}],\"Default\":\"par\"}}}", {
             "sequenceOneArn" : {
               "Fn::GetAtt" : [ "sequenceOne", "Arn" ]
             },

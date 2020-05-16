@@ -1,0 +1,17 @@
+{
+  "apiVersion" : "serving.knative.dev/v1",
+  "kind" : "Service",
+  "metadata" : {
+    "name" : "parallelTwo"
+  },
+  "spec" : {
+    "template" : {
+      "spec" : {
+        "containers" : [ {
+          "image" : "xlight05/faas-parallelTwo",
+          "env" : [ ]
+        } ]
+      }
+    }
+  }
+}

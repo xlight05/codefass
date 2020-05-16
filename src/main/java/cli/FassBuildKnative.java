@@ -3,6 +3,7 @@ package cli;
 import codegen.CloudArtifactGenerator;
 import codegen.FunctionOrchestrator;
 import codegen.aws.models.formation.CloudFormationGenerator;
+import codegen.knative.KnativeGenerator;
 import compiler.Executor;
 import org.codehaus.plexus.util.FileUtils;
 import picocli.CommandLine;
@@ -24,8 +25,8 @@ public class FassBuildKnative implements Runnable{
         try {
             FunctionOrchestrator liveFlow = compiler.compile(defFilePath);
             //System.out.println(liveFlow);
-            CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
-            awsGen.build();
+            CloudArtifactGenerator knativeGen = new KnativeGenerator(liveFlow);
+            knativeGen.build();
         } catch (IOException e) {
             e.printStackTrace();
         }

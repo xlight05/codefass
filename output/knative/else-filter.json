@@ -1,0 +1,20 @@
+{
+  "apiVersion" : "serving.knative.dev/v1",
+  "kind" : "Service",
+  "metadata" : {
+    "name" : "else-filter"
+  },
+  "spec" : {
+    "template" : {
+      "spec" : {
+        "containers" : [ {
+          "image" : "villardl/filter-nodejs:0.1",
+          "env" : [ {
+            "name" : "FILTER",
+            "value" : "!(event.type==seq)"
+          } ]
+        } ]
+      }
+    }
+  }
+}

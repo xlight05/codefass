@@ -1,0 +1,44 @@
+{
+  "apiVersion" : "flows.knative.dev/v1alpha1",
+  "kind" : "Parallel",
+  "metadata" : {
+    "name" : "ChoiceBlock"
+  },
+  "spec" : {
+    "channelTemplate" : {
+      "apiVersion" : "messaging.knative.dev/v1alpha1",
+      "kind" : "InMemoryChannel"
+    },
+    "branches" : [ {
+      "filter" : {
+        "ref" : {
+          "apiVersion" : "serving.knative.dev/v1",
+          "kind" : "Service",
+          "name" : "if-filter"
+        }
+      },
+      "subscriber" : {
+        "ref" : {
+          "apiVersion" : "flows.knative.dev/v1alpha1",
+          "kind" : "Sequence",
+          "name" : "seq"
+        }
+      }
+    }, {
+      "filter" : {
+        "ref" : {
+          "apiVersion" : "serving.knative.dev/v1",
+          "kind" : "Service",
+          "name" : "else-filter"
+        }
+      },
+      "subscriber" : {
+        "ref" : {
+          "apiVersion" : "flows.knative.dev/v1alpha1",
+          "kind" : "Parallel",
+          "name" : "par"
+        }
+      }
+    } ]
+  }
+}

@@ -115,7 +115,7 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
 
         try {
             String cloudFormationJson = mapper.writeValueAsString(cloudFormation);
-            System.out.println(cloudFormationJson);
+            //System.out.println(cloudFormationJson);
             List<String> lines = Arrays.asList(cloudFormationJson);
 
             File directory = new File("output");
@@ -135,59 +135,13 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
 
             Path file = Paths.get("output/aws/cloudformation.json");
             Files.write(file, lines, StandardCharsets.UTF_8);
+            System.out.println("Knative artifacts generated :"+directory1.getAbsolutePath()+File.separator+
+                    "cloudformation.json");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
-//    public void build() {
-//        ObjectMapper mapper = new ObjectMapper();
-//        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-//
-////        Step step = new Step();
-////
-////        ChoiceStep choiceStep = new ChoiceStep();
-////
-////        List<Comparision> choices = new ArrayList<>();
-////
-////        SimpleComparision simpleComparision = new SimpleComparision();
-////        simpleComparision.setVariable("$.value");
-////        simpleComparision.setNumericEquals(0);
-////        simpleComparision.setNext("ValueIsZero");
-////
-////        SimpleComparision simpleComparision1 = new SimpleComparision();
-////        simpleComparision1.setVariable("$.type");
-////        simpleComparision1.setStringEquals("Private");
-////        simpleComparision1.setNext("Public");
-////
-////        NestedComparision nestedComparision1 = new NestedComparision();
-////        SimpleComparision simpleComparision2 = new SimpleComparision();
-////        simpleComparision2.setVariable("$.type");
-////        simpleComparision2.setStringEquals("Private");
-////
-////        nestedComparision1.setNot(simpleComparision2);
-////        nestedComparision1.setNext("Public");
-////
-////        choices.add(simpleComparision);
-////        choices.add(simpleComparision1);
-////        choices.add(nestedComparision1);
-////
-////        choiceStep.setChoices(choices);
-////        Map<String,Object> stepList = new LinkedHashMap<>();
-////        stepList.put("ChoiceStateX",choiceStep);
-////        step.setStates(stepList);
-//
-//        Step step = generateStep();
-//
-//        try {
-//            String cloudFormationJson = mapper.writeValueAsString(step);
-//            System.out.println(cloudFormationJson);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     public Step generateStep() {
         FunctionOrchestrator functionOrchestrator = super.getFunctionOrchestrator();
@@ -262,17 +216,17 @@ public class CloudFormationGenerator extends CloudArtifactGenerator {
         }
 
         step.setStates(stepList);
-        System.out.println("----------------------------------------------");
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        String cloudFormationJson = null;
-            cloudFormationJson = mapper.writeValueAsString(step);
-            System.out.println(cloudFormationJson);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        System.out.println("----------------------------------------------");
+//        System.out.println("----------------------------------------------");
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+//        String cloudFormationJson = null;
+//            cloudFormationJson = mapper.writeValueAsString(step);
+//            System.out.println(cloudFormationJson);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("----------------------------------------------");
         return step;
     }
 

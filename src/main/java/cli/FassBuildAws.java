@@ -34,7 +34,7 @@ public class FassBuildAws implements Runnable {
         Executor compiler = new Executor();
         try {
             FunctionOrchestrator liveFlow = compiler.compile(defFilePath);
-            System.out.println(liveFlow);
+            //System.out.println(liveFlow);
             CloudArtifactGenerator awsGen = new CloudFormationGenerator(liveFlow);
             awsGen.build();
         } catch (IOException e) {
